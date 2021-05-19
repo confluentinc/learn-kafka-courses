@@ -1,0 +1,336 @@
+# Building Data Pipelines with Kafka and Confluent
+Robin Moffatt <robin@confluent.io>
+v0.01, 17 May 2021
+
+## Module 1 / Exercise 1 - Introduction
+
+In this exercise you will set up the necessary environments for the exercises in the rest of this course. 
+
+### Confluent Cloud
+
+For this course you will use Confluent Cloud to provide a managed Kafka service, connectors, and stream processing. 
+
+1. Go to https://www.confluent.io/confluent-cloud/tryfree?utm_source=learnkafka&NEEDTODOTHERESTOFTHEUTMCODE[Confluent Cloud]. If you don't already have a Confluent Cloud account you can create one here. Use promotion code `<TBC>` for money off your cloud bill.  
+
+2. Create a new cluster in Confluent Cloud. For the purposes of this exercise you can use the `Basic` type. Name the cluster `pipelines_quickstart`. 
++
+image::images/dp01-01-01.png[Create a cluster in Confluent Cloud]
+
+3. Once the cluster is created, go to the ksqlDB page within it and click `Add application`. 
++
+If prompted, select *Create application myself*. 
++
+Leave the _access control_ set to *Global access*. Give _application name_ as `pipelines-quickstart-ksqldb`, and leave the _number of streaming units_ set to *4*. 
++
+image::images/dp01-01-02.png[Creating a ksqlDB application in Confluent Cloud]
+
+TODO: `<Disclaimer / warning about costs incurred to go here>`
+
+### Source and Target systems
+
+This course uses a source MySQL database and target Elasticsearch instance. Both of these should be accessible from the internet. 
+
+The provision and configuration of these systems is primarily outside the scope of this exercise. These could be run as managed services (for example, Amazon RDS and Elastic Cloud), or self-hosted and the appropriate networking configured such that they can be connected to from the internet. 
+
+#### MySQL 
+
+You can follow link:aws_rds_mysql.adoc[this guide] to set up an AWS RDS managed MySQL instance. 
+
+Regardless of how you provision your MySQL database, run link:customers.sql[this script] to create the table and data used in this course. If you're using the `mysql` CLI you can do it like this: 
+
+[source,bash]
+----
+# Note: perhaps this can be done with a curl to pull the `customers.sql` file down
+#       from GitHub directly?
+mysql -u admin -h $MYSQL_HOST -p < customers.sql
+----
+
+#### Elasticsearch
+
+You can run Elasticsearch yourself, or use a managed service such as Elastic Cloud for which you can https://www.elastic.co/cloud/elasticsearch-service/signup[sign up here].
+
+
+## Module 2 / Exercise 1 - Kafka Connect
+
+In this exercise you will create a new topic to hold ratings event data, and set up a data generator to populate the topic. 
+
+### Create the `ratings` topic
+
+From the *Topics* screen of your Confluent Cloud cluster click on *Create topic*. 
+
+Name the topics `ratings` and ensure that *Number of partitions* is set to `6`. 
+
+image::images/dp02-01-01.png[Creating a new topic]
+
+Click on *Create with defaults*. 
+
+### Create a Data Generator with Kafka Connect
+
+In reality the `ratings` topic would probably be populated from an application using the Producer API to write messages to it. Here we're going to use a data generator that's available as a connector for Kafka Connect. 
+
+1. On Confluent Cloud go to your cluster's *Connectors* page. 
++
+In the search box enter `datagen`
++
+image::images/dp02-01-02.png[Finding the datagen connector]
++
+Select the *Datagen Source* connector
+
+2. Under *Kafka Cluster credentials* click on *Generate Kafka API key & secret*. 
++
+Give a *Description* for the API key, and make a note of the generated key and secret as you'll need these in later exercises
++
+image::images/dp02-01-03.png[Kafka API details]
+
+3. Set the remainder of the options as shown below
++
+.Datagen configuration options
+|===
+2+|*Which topic do you want to send data to?*
+|Topic name |`ratings` _(as created in the step above)_
+2+|*Output messages*
+|Output message format | AVRO
+2+|*Datagen Details*
+|Quickstart | RATINGS
+|Max interval between messagse (ms) | 1000
+2+|*Number of tasks for this connector*
+|Tasks | 1
+|===
++
+Click *Next*
+
+4. On the confirmation screen the JSON should look like this: 
++
+[source,javascript]
+----
+{
+  "name": "DatagenSourceConnector_0",
+  "config": {
+    "connector.class": "DatagenSource",
+    "name": "DatagenSourceConnector_0",
+    "kafka.api.key": "****************",
+    "kafka.api.secret": "****************************************************************",
+    "kafka.topic": "ratings",
+    "output.data.format": "AVRO",
+    "quickstart": "RATINGS",
+    "max.interval": "1000",
+    "tasks.max": "1"
+  }
+}
+----
++
+If it doesn't, return to the previous screen and amend the values as needed. 
++
+Click *Launch* to instantiate the connector. This will take a few moments. 
+
+5. On the *Connectors* page of your cluster you should see the new connector listed, and after a moment or two in status *Running*
++
+image::images/dp02-01-04.png[Connector list including datagen]
+
+6. From the *Topics* page of your cluster select the `ratings` topic, and then *Messages*. You should see a steady stream of new messages arriving: 
++
+image::images/dp02-01-05.png[New messages arriving on the ratings topic]
+
+## Module 3 / Exercise 1 - Kafka and CDC
+
+In this exercise we'll ingest information about the customers who are writing the rating messages created in the previous exercise. The customer data is held in a MySQL database. 
+
+### View the customer data in MySQL
+
+1. You should have created and populated a MySQL database in the first exercise. If you didn't, please return to that step and complete it before proceeding. 
++
+Remember that the MySQL database needs to be accessible from the internet. 
+
+2. Connect to MySQL and check that the customer data is present: 
++
+[source,sql]
+----
+mysql> SELECT first_name, last_name, email, club_status FROM demo.CUSTOMERS LIMIT 5;
++-------------+------------+------------------------+-------------+
+| first_name  | last_name  | email                  | club_status |
++-------------+------------+------------------------+-------------+
+| Rica        | Blaisdell  | rblaisdell0@rambler.ru | bronze      |
+| Ruthie      | Brockherst | rbrockherst1@ow.ly     | platinum    |
+| Mariejeanne | Cocci      | mcocci2@techcrunch.com | bronze      |
+| Hashim      | Rumke      | hrumke3@sohu.com       | platinum    |
+| Hansiain    | Coda       | hcoda4@senate.gov      | platinum    |
++-------------+------------+------------------------+-------------+
+5 rows in set (0.24 sec)
+----
++
+If necessary, return to the first exercise to populate the data into your database. 
+
+### Create a topic for the Customer data
+
+Whilst the MySQL connector can create the target topic for the data that it ingests, we need to create it with certain configuration properties, and therefore will create it explicitly first. This is in general a good practice anyway. 
+
+From the *Topics* screen of your Confluent Cloud cluster click on *Create topic*. 
+
+Name the topics `mysql01.demo.CUSTOMERS` and ensure that *Number of partitions* is set to `6`. 
+
+Click on *Customize settings* and then under *Storage* set the *Cleanup policy* to `Compact`. 
+
+Click on *Save & create*
+
+image::images/dp03-01-01.png[Creating a new customers topic]
+
+Click on *Create with defaults*. 
+
+### Create the MySQL connector
+
+1. From the *Connectors* page in Confluent Cloud click on *Add connector* and search for the `MySQL CDC Source` connector. 
++
+image::images/dp03-01-06.png[Searching for the MySQL CDC connector on Confluent Cloud]
++
+Click on the connector to add it.
++
+NOTE: Make sure you select the `MySQL CDC Source` and _not_ the similarly-named `MySQL Source` connector. 
+
+2. Configure the connector thus:
++
+.MySQL CDC Source connector configuration options
+|===
+2+|*Kafka Cluster credentials*
+|Kafka API Key
+.2+| _Use the same API details as you created for the Datagen connector above. You can create a new API key if necessary, but API key numbers are limited so for the purposes of this exercise only it's best to re-use if you can._
+|Kafka API Secret
+
+2+|*How should we connect to your database?*
+|Database hostname
+.4+| _These values will depend on where your database is and how you have configured it. The database needs to be open to inbound connections from the internet._
+|Database port
+|Database username
+|Database password
+|Database server name|`mysql01`
+|SSL mode|`preferred`
+
+2+|*Database details*
+|Tables included | `demo.CUSTOMERS`
+|Snapshot mode|`when_needed`
+2+|*Output messages*
+|Output message format | `AVRO`
+|After-state only | `true`
+2+|*Number of tasks for this connector*
+|Tasks | 1
+|===
+
+3. Click *Next*. Connectivity to the database will be validated and if successful you'll see a summary screen of configuration. The JSON should look like this: 
++
+[source,javascript]
+----
+{
+  "name": "MySqlCdcSourceConnector_0",
+  "config": {
+    "connector.class": "MySqlCdcSource",
+    "name": "MySqlCdcSourceConnector_0",
+    "kafka.api.key": "****************",
+    "kafka.api.secret": "****************************************************************",
+    "database.hostname": "kafka-data-pipelines.xxxxx.rds.amazonaws.com",
+    "database.port": "3306",
+    "database.user": "admin",
+    "database.password": "********************",
+    "database.server.name": "mysql01",
+    "database.ssl.mode": "preferred",
+    "table.include.list": "demo.CUSTOMERS",
+    "snapshot.mode": "when_needed",
+    "output.data.format": "AVRO",
+    "after.state.only": "true",
+    "tasks.max": "1"
+  }
+}
+----
++
+Click on *Launch*. 
+
+4. After a few moments the connector will be provisioned and shortly thereafter you should see that it is *Running* (alongside the existing `Datagen` connector that you created in the previous exercise): 
++
+image::images/dp03-01-02.png[Both connectors running]
+
+5. From the *Topics* list click on `mysql01.demo.CUSTOMERS` and then *Messages*. Because there is currently only a static set of data in MySQL there is not a stream of new messages arriving on the topic to view. 
++
+Click on *offset* and enter 0 and select the first option on the list
++
+image::images/dp03-01-03.png[Resetting the offset on the topic]
++
+You should then see messages present on the topic. 
++
+image::images/dp03-01-04.png[Messages on the customers topic]
+
+## Module 4 / Exercise 1 - Filtering streams of data
+
+The ratings messages that we receive include a field that indicates the device from which they were left. The field is called `channel` and includes some values indicating that they're from test devices. 
+
+We'd like to create a new stream that includes only data from live devices. For this we can use ksqlDB. 
+
+1. Before continuing, make sure that you have created a ksqlDB application on your Confluent Cloud as described in the first exercise. From the *ksqlDB* page you should see the application listed and in *Status* `Up`.
++
+image::images/dp04-01-01.png[ksqlDB application in the list]
+
+2. Click on the ksqlDB application to open the editor. The first thing you need to do is to declare a ksqlDB stream on the topic with the ratings events in. This gives ksqlDB the information it needs about the schema of the data.
++
+Paste the following statement into the *Editor* and click *Run query*
++
+[source,sql]
+----
+CREATE STREAM RATINGS WITH (KAFKA_TOPIC='ratings',VALUE_FORMAT='AVRO');
+----
++
+image::images/dp04-01-02.png[CREATE STREAM RATINGS]
+
+3. You can view the messages flowing through the Kafka topic by running a `SELECT` against the stream: 
++
+[source,sql]
+----
+SELECT USER_ID, STARS, CHANNEL, MESSAGES FROM RATINGS EMIT CHANGES;
+----
++
+Use the table icon in to the top right of the messages to view them as columns
++
+image::images/dp04-01-03.png[SELECT … FROM RATINGS]
+
+4. Note how in the data shown returned in the above query there are values in the `CHANNEL` field that include `-test`. You can filter these out using a SQL predicate: 
++
+[source,sql]
+----
+SELECT USER_ID, STARS, CHANNEL, MESSAGE 
+  FROM RATINGS 
+ WHERE LCASE(CHANNEL) NOT LIKE '%test%'
+  EMIT CHANGES;
+----
++
+When you run this you'll notice that the results are returned to the screen. 
+
+5. To tell ksqlDB to process all of the existing messages in the topic as well as all new ones that arrive we set the `auto.offset.reset` parameter to `earliest`. To do this change the dropdown from its default of `Latest` to `Earliest`
++
+image::images/dp04-01-04.png['auto.offset.reset' = 'earliest']
+
+6. Using above statement we can get ksqlDB to write all messages matching this criterion into a new ksqlDB stream. A ksqlDB stream is always backed by a Kafka topic. 
++
+[source,sql]
+----
+CREATE STREAM RATINGS_LIVE AS
+SELECT * FROM RATINGS 
+ WHERE LCASE(CHANNEL) NOT LIKE '%test%' 
+ EMIT CHANGES;
+----
++
+image::images/dp04-01-05.png[CSAS]
+
+7. Query the new stream and validate that there are no `CHANNEL` values with `test` in them: 
++
+[source,sql]
+----
+SELECT USER_ID, STARS, CHANNEL, MESSAGE 
+  FROM RATINGS_LIVE
+  EMIT CHANGES;
+----
++
+image::images/dp04-01-06.png[Results from ratings_live stream]
+
+8. From your cluster's *Topics* page locate the new Kafka topic that's been created. It will have a prefix in its name, but end with `RATINGS_LIVE`
++
+image::images/dp04-01-07.png[New ratings_live topic]
++
+Click on the topic. If data lineage is enabled on your cluster click on it to view the flow of data that you've created. 
++
+image::images/dp04-01-08.png[Data Lineage]
