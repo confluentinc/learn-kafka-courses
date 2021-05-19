@@ -1,0 +1,11 @@
+{
+  "namespace": "io.confluent.developer.avro",
+  "type": "record",
+  "name": "ProductOrder",
+  "fields": [
+    {"name": "order_id", "type": "string"},
+    {"name": "product", "type": "string"},
+    {"name": "user_id", "type": "string"},
+    {"name": "time", "type": "long"}
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "namespace": "io.confluent.developer.avro",
+  "type": "record",
+  "name": "ProcessedOrder",
+  "fields": [
+    {"name": "time_processed", "type": "long"},
+    {"name": "product", "type": "string"}
+  ]
+}
