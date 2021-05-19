@@ -402,7 +402,8 @@ SELECT C.CUSTOMER_ID,
        R.RATING_ID, 
        R.MESSAGE, 
        R.STARS, 
-       R.CHANNEL       
+       R.CHANNEL,
+       TIMESTAMPTOSTRING(R.ROWTIME,'yyyy-MM-dd''T''HH:mm:ss.SSSZ') AS RATING_TS
 FROM   RATINGS_LIVE R
        INNER JOIN CUSTOMERS C
          ON R.USER_ID = C.CUSTOMER_ID
@@ -440,3 +441,100 @@ image::images/dp05-01-06.png[Club status automagically picked up from MySQL 🎉
 image::images/dp05-01-07.png[Data Lineage FTW]
 +
 From here you can see where the data comes from, its relative throughput volumes, and the stages of processing that it goes through.
+
+## Module 6 / Exercise 1 - Streaming data to external systems
+
+This exercise is the culmination of a pipeline project which takes streams of ratings events, filters them and enriches them with information about the customer using data streamed from a database. 
+
+image::images/dp06-01-01.png[Data Lineage]
+
+For the final step we will stream the enriched data out to Elasticsearch from where it can be built into a dashboard. You need to have an Elasticsearch instance created as described in the first exercise, and it must be accessible from the internet. 
+
+1. In Confluent Cloud click on the *Connectors* link, click *Add connector*, and search for the *Elasticsearch Service Sink* connector
++
+image::images/dp06-01-02.png[Elasticsearch sink connector in Confluent Cloud]
++
+Click on the tile to create the sink connector
+
+2. Configure the connector as follows. You can leave blank any options that are not specified below.
++
+.Elasticsearch sink configuration options
+|===
+2+|*Which topics do you want to get data from?*
+|topics |`ratings-enriched`
+2+|*Input messages*
+|Input message format | AVRO
+2+|*Kafka Cluster credentials*
+|Kafka API Key
+.2+| _Use the same API details as you created for the Datagen connector previously. You can create a new API key if necessary, but API key numbers are limited so for the purposes of this exercise only it's best to re-use if you can._
+|Kafka API Secret
+2+|*How should we connect to your Elasticsearch Service?*
+|Connection URI
+.3+| _These values will depend on where your Elasticsearch instance is and how you have configured it. Elasticsearch needs to be open to inbound connections from the internet._
+|Connection username
+|Connection password
+2+|*Data Conversion*
+|Type name | `_doc`
+|Key ignore | `true`
+|Schema ignore | `true`
+2+|*Connection Details*
+|Batch size | `5` _(this is a setting only suitable for this exercise; in practice you would leave it as the default or set it much higher for performance reasons)._
+2+|*Number of tasks for this connector*
+|Tasks | 1
+|===
++
+Click *Next* to test the connection and validate the configuration. 
+
+3. On the next screen the JSON configuration should be similar to that shown below. If it is not, return to the previous screen to amend it as needed.
++
+[source,javascript]
+----
+{
+  "name": "ElasticsearchSinkConnector_0",
+  "config": {
+    "topics": "ratings-enriched",
+    "input.data.format": "AVRO",
+    "connector.class": "ElasticsearchSink",
+    "name": "ElasticsearchSinkConnector_0",
+    "kafka.api.key": "****************",
+    "kafka.api.secret": "****************************************************************",
+    "connection.url": "https://es-host:port",
+    "connection.username": "elastic",
+    "connection.password": "************************",
+    "type.name": "_doc",
+    "key.ignore": "true",
+    "schema.ignore": "true",
+    "batch.size": "5",
+    "tasks.max": "1"
+  }
+}
+----
++
+Click *Launch* 
+
+4. After a few moments the connector will be provisioned and shortly thereafter you should see that it is *Running* (alongside the existing connectors that you created in previous exercises): 
++
+image::images/dp06-01-03.png[All three connectors running]
+
+5. In Elasticsearch check that data has been received in the index. You can do this using the REST API or with Kibana itself. Here's an example using `curl` to do it: 
++
+[source,bash]
+----
+curl -u $ES_USER:$ES_PW $ES_ENDPOINT/_cat/indices/ratings\*\?v=true
+health status index            uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   ratings-enriched Wj-o_hEwR8ekHSF7M7aVug   1   1     101091            0     12.1mb            6mb
+----
++
+Note that the `docs.count` value should be above zero. 
+
+6. You can now use the data. In our example we're streaming it to Elasticsearch so as to be able to build an operational dashboard using Kibana. The following assumes that you are familiar with the use of Kibana. 
++
+** In Kibana, create an index pattern for the `ratings-enriched` index, with `RATING_TS` as the time field.
++
+image::images/dp06-01-04.png[Creating a Kibana index pattern]
+** Use the *Discover* view to explore the data and its characteristics
++
+image::images/dp06-01-05.png[Kibana Discover view]
++
+Create visualisations to build a dashboard showing relevant details in the data
+TODO
