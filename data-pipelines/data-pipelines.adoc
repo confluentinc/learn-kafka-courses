@@ -1,6 +1,6 @@
 # Building Data Pipelines with Kafka and Confluent
 Robin Moffatt <robin@confluent.io>
-v0.01, 17 May 2021
+v1.00,e20 May 2021
 
 ## Module 1 / Exercise 1 - Introduction
 
@@ -537,4 +537,5 @@ image::images/dp06-01-04.png[Creating a Kibana index pattern]
 image::images/dp06-01-05.png[Kibana Discover view]
 +
 Create visualisations to build a dashboard showing relevant details in the data
-TODO
++
+image::images/dp06-01-06.png[Kibana Dashboard]
