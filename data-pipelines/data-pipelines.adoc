@@ -69,6 +69,8 @@ mysql -u admin -h $MYSQL_HOST -p < customers.sql
 
 You can run Elasticsearch yourself, or use a managed service such as Elastic Cloud for which you can https://www.elastic.co/cloud/elasticsearch-service/signup[sign up here].
 
+''''
+TODO: `<Disclaimer / warning about costs incurred to go here>`
 
 ## Module 2 / Exercise 1 - Kafka Connect
 
@@ -150,6 +152,9 @@ image::images/dp02-01-04.png[Connector list including datagen]
 6. From the *Topics* page of your cluster select the `ratings` topic, and then *Messages*. You should see a steady stream of new messages arriving: 
 +
 image::images/dp02-01-05.png[New messages arriving on the ratings topic]
+
+''''
+TODO: `<Disclaimer / warning about costs incurred to go here>`
 
 ## Module 3 / Exercise 1 - Kafka and CDC
 
@@ -274,6 +279,9 @@ You should then see messages present on the topic.
 +
 image::images/dp03-01-04.png[Messages on the customers topic]
 
+''''
+TODO: `<Disclaimer / warning about costs incurred to go here>`
+
 ## Module 4 / Exercise 1 - Filtering streams of data
 
 The ratings messages that we receive include a field that indicates the device from which they were left. The field is called `channel` and includes some values indicating that they're from test devices. 
@@ -352,6 +360,9 @@ image::images/dp04-01-07.png[New ratings_live topic]
 Click on the topic. If data lineage is enabled on your cluster click on it to view the flow of data that you've created. 
 +
 image::images/dp04-01-08.png[Data Lineage]
+
+''''
+TODO: `<Disclaimer / warning about costs incurred to go here>`
 
 ## Module 5 / Exercise 1 - Enriching events using ksqlDB
 
@@ -448,6 +459,9 @@ image::images/dp05-01-06.png[Club status automagically picked up from MySQL 🎉
 image::images/dp05-01-07.png[Data Lineage FTW]
 +
 From here you can see where the data comes from, its relative throughput volumes, and the stages of processing that it goes through.
+
+''''
+TODO: `<Disclaimer / warning about costs incurred to go here>`
 
 ## Module 6 / Exercise 1 - Streaming data to external systems
 
