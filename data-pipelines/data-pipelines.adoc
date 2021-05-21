@@ -1,6 +1,6 @@
 # Building Data Pipelines with Kafka and Confluent
 Robin Moffatt <robin@confluent.io>
-v1.00,e20 May 2021
+v1.10, 21 May 2021
 
 ## Module 1 / Exercise 1 - Introduction
 
@@ -16,13 +16,33 @@ For this course you will use Confluent Cloud to provide a managed Kafka service,
 +
 image::images/dp01-01-01.png[Create a cluster in Confluent Cloud]
 
-3. Once the cluster is created, go to the ksqlDB page within it and click `Add application`. 
+3. Once the cluster is created, you need to make sure that its finished initialising before going to the next step. To do this go to the Topics page and wait for the *Create topic* button to become available
++
+image::images/dp01-01-12.png[Create topic not available]
++
+image::images/dp01-01-13.png[Create topic available]
+
+4. Next, you need to create a Schema Registry for your environment. 
++
+NOTE: If you already have a Schema Registry in your Confluent Cloud environment you can skip this step. 
++
+** From the *Schema Registry* option on your environment's home page (or from the left-hand navigation on the Cluster page) click on *Set up on my own*. 
++
+image::images/dp02-01-06.png[Creating the Schema Registry]
++
+** Select a cloud platform and region and click *Continue*
++
+image::images/dp02-01-07.png[Creating the Schema Registry]
+
+5. Now go to the ksqlDB page within it and click `Add application`. 
 +
 If prompted, select *Create application myself*. 
 +
 Leave the _access control_ set to *Global access*. Give _application name_ as `pipelines-quickstart-ksqldb`, and leave the _number of streaming units_ set to *4*. 
 +
 image::images/dp01-01-02.png[Creating a ksqlDB application in Confluent Cloud]
++
+The ksqlDB application will take a few minutes to provision. 
 
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
@@ -56,7 +76,7 @@ In this exercise you will create a new topic to hold ratings event data, and set
 
 ### Create the `ratings` topic
 
-From the *Topics* screen of your Confluent Cloud cluster click on *Create topic*. 
+From the *Topics* screen of your Confluent Cloud cluster click on *Add topic*. 
 
 Name the topics `ratings` and ensure that *Number of partitions* is set to `6`. 
 
@@ -164,17 +184,15 @@ If necessary, return to the first exercise to populate the data into your databa
 
 Whilst the MySQL connector can create the target topic for the data that it ingests, we need to create it with certain configuration properties, and therefore will create it explicitly first. This is in general a good practice anyway. 
 
-From the *Topics* screen of your Confluent Cloud cluster click on *Create topic*. 
+From the *Topics* screen of your Confluent Cloud cluster click on *Add topic*. 
 
 Name the topics `mysql01.demo.CUSTOMERS` and ensure that *Number of partitions* is set to `6`. 
 
 Click on *Customize settings* and then under *Storage* set the *Cleanup policy* to `Compact`. 
 
-Click on *Save & create*
-
 image::images/dp03-01-01.png[Creating a new customers topic]
 
-Click on *Create with defaults*. 
+Click on *Save & create*
 
 ### Create the MySQL connector
 
@@ -281,7 +299,7 @@ image::images/dp04-01-02.png[CREATE STREAM RATINGS]
 +
 [source,sql]
 ----
-SELECT USER_ID, STARS, CHANNEL, MESSAGES FROM RATINGS EMIT CHANGES;
+SELECT USER_ID, STARS, CHANNEL, MESSAGE FROM RATINGS EMIT CHANGES;
 ----
 +
 Use the table icon in to the top right of the messages to view them as columns
@@ -374,17 +392,6 @@ CREATE TABLE CUSTOMERS WITH (FORMAT='AVRO') AS
     FROM CUSTOMERS_S
     GROUP BY id;
 ----
-+
-With the table created, you can now query it in a similar way to which you would interact with a relational database:
-+
-[source,sql]
-----
-SELECT FIRST_NAME, LAST_NAME, EMAIL, CLUB_STATUS
-  FROM CUSTOMERS
-  WHERE CUSTOMER_ID=5;
-----
-+
-image::images/dp05-01-03.png[Pull query against a table]
 
 3. With the table created you can now enrich the ratings events with information about the customer, using the primary/foreign key relationship.
 +
