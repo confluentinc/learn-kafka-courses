@@ -12,7 +12,7 @@ _Specific details may vary. Costs may be incurred and these are your own respons
 +
 image::images/dp01-01-03.png[Create a MySQL instance on AWS RDS]
 
-** Make a note of the generated password for the master username (which by default is `master`). 
+** Make a note of the generated password for the master username (which by default is `admin`). 
 +
 image::images/dp01-01-04.png[Prompt to view password]
 

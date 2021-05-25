@@ -441,6 +441,14 @@ image::images/dp05-01-04.png[Querying the enriched stream]
 +
 In the Confluent Cloud ksqlDB editor run a query to show current ratings from customer ID 1. Since we only want current ratings set the `auto.offset.reset` to `latest`. Note the value of `CLUB_STATUS` shown for each rating.
 +
+[source,sql]
+----
+SELECT CUSTOMER_ID, FULL_NAME, CLUB_STATUS, STARS, MESSAGE
+  FROM RATINGS_WITH_CUSTOMER_DATA
+ WHERE CUSTOMER_ID=1
+  EMIT CHANGES;
+----
++
 image::images/dp05-01-05.png[Ratings from customer id 1]
 +
 Leave the query running in the ksqlDB editor. In *MySQL* make a change to the customer's club status: 
@@ -450,16 +458,7 @@ Leave the query running in the ksqlDB editor. In *MySQL* make a change to the cu
 UPDATE demo.CUSTOMERS SET CLUB_STATUS='platinum' WHERE ID=1;
 ----
 +
-Watch the ksqlDB results table for subsequent ratings from customer ID 1. You should see that it soon reflects the updated `CLUB_STATUS`: 
-+
-[source,sql]
-----
-SELECT CUSTOMER_ID, FULL_NAME, CLUB_STATUS, STARS, MESSAGE
-  FROM RATINGS_WITH_CUSTOMER_DATA
- WHERE CUSTOMER_ID=1
-  EMIT CHANGES;
-----
-
+Watch the ksqlDB results table for subsequent ratings from customer ID 1. You should see that it soon reflects the updated `CLUB_STATUS`. 
 +
 image::images/dp05-01-06.png[Club status automagically picked up from MySQL 🎉]
 
