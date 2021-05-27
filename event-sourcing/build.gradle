@@ -41,7 +41,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'event.sourcing.App'
+    mainClass = 'io.confluent.developer.event.sourcing.ShoppingCartApp'
 }
 test {
     useJUnit()
