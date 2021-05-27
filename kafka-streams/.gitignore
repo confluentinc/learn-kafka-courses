@@ -2,3 +2,7 @@
 .idea/
 .gradle/
 build/
+
+streams.properties
+ccloud.properties
+*.log

@@ -27,10 +27,18 @@ apply plugin: "com.github.johnrengelman.shadow"
 
 dependencies {
     implementation "org.apache.avro:avro:1.10.2"
-    implementation "org.slf4j:slf4j-simple:1.7.30"
-    implementation "org.apache.kafka:kafka-streams:2.8.0"
-    implementation "org.apache.kafka:kafka-clients:2.8.0"
-    implementation "io.confluent:kafka-streams-avro-serde:6.1.1"
+    implementation "org.apache.logging.log4j:log4j-api:2.7"
+    implementation "org.apache.logging.log4j:log4j-core:2.7"
+    implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.7"
+
+    implementation('org.apache.kafka:kafka-streams:2.8.0') {
+        exclude group: 'org.apache.kafka', module: 'kafka-clients'
+    }
+    implementation('org.apache.kafka:kafka-clients:2.8.0!!')
+    implementation('io.confluent:kafka-streams-avro-serde:6.1.1') {
+        exclude group: 'org.apache.kafka', module: 'kafka-clients'
+        exclude group: 'org.apache.kafka', module: 'kafka-streams'
+    }
 
     testImplementation "org.apache.kafka:kafka-streams-test-utils:2.8.0"
     testImplementation "junit:junit:4.13.2"
@@ -41,5 +49,34 @@ test {
         outputs.upToDateWhen { false }
         showStandardStreams = true
         exceptionFormat = "full"
+    }
+}
+
+var basePackage = 'io.confluent.developer.'
+def exerciseMap = [aggregate: basePackage + 'aggregate.StreamsAggregate',
+                   basic    : basePackage + 'basic.BasicStreams',
+                   errors: basePackage + 'errors.StreamsErrorHandling',
+                   joins: basePackage + 'joins.StreamsJoin',
+                   ktable: basePackage + 'ktable.KTableExample',
+                   processor: basePackage + 'processor.ProcessorApi',
+                   time: basePackage + 'time.StreamsTimestampExtractor',
+                   windows: basePackage + 'windows.StreamsWindows']
+
+task runStreams(type: Exec) {
+
+    var streamsFullPath = ''
+
+    if (project.hasProperty("args")) {
+        var exercise = project.getProperty("args")
+        streamsFullPath = exerciseMap[exercise]
+
+        if (streamsFullPath == null) {
+           throw new StopActionException("!!!!!! You entered '${exercise}' for an exercise to run, but that's not a valid entry.  The valid options are ${exerciseMap.keySet()}" )
+        }
+        dependsOn assemble
+        group = "Execution"
+        println "Using example ${streamsFullPath}"
+        description = "Run a Kafka Streams exercise"
+        commandLine "java", "-classpath", sourceSets.main.runtimeClasspath.getAsPath(), streamsFullPath
     }
 }
