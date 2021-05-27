@@ -10,7 +10,6 @@ import org.apache.kafka.streams.StreamsBuilder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
@@ -52,7 +51,7 @@ public class ShoppingCartApp {
                   oldState.getItems().getOrDefault(newAction.getItem(), 0L) - 1L);
                 break;
             case "checkout":
-                newState = oldState;
+                newState = oldState; // TODO: What to do on the checkout action?
                 break;
         }
         return newState;

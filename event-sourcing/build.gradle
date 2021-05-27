@@ -4,6 +4,7 @@ buildscript {
     }
     dependencies {
         classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.22.0"
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
     }
 }
 
@@ -16,6 +17,7 @@ plugins {
 sourceCompatibility = "1.11"
 targetCompatibility = "1.11"
 version = "0.0.1"
+mainClassName = "io.confluent.developer.event.sourcing.ShoppingCartApp"
 
 repositories {
     jcenter()
@@ -26,6 +28,7 @@ repositories {
 }
 
 apply plugin: "com.commercehub.gradle.plugin.avro"
+apply plugin: "com.github.johnrengelman.shadow"
 
 dependencies {
     implementation "org.apache.avro:avro:1.10.2"
@@ -39,9 +42,13 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
-application {
-    // Define the main class for the application.
-    mainClass = 'io.confluent.developer.event.sourcing.ShoppingCartApp'
+jar {
+    manifest {
+        attributes(
+                "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(" "),
+                "Main-Class": mainClassName
+        )
+    }
 }
 test {
     useJUnit()
