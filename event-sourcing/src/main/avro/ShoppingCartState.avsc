@@ -1,0 +1,13 @@
+{
+  "namespace": "io.confluent.developer.event.sourcing.avro",
+  "type": "record",
+  "name": "ShoppingCartState",
+  "fields": [
+  { "name": "customer", "type": "string" },
+  { "name": "items",
+    "type": {
+        "type": "map",
+        "values": { "type": "long" }
+    }}
+  ]
+}
