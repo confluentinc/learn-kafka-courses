@@ -1,10 +1,25 @@
 # Building Data Pipelines with Kafka and Confluent
 Robin Moffatt <robin@confluent.io>
-v1.11, 21 May 2021
+v1.20, 27 May 2021
 
 ## Module 1 / Exercise 1 - Introduction
 
-In this exercise you will set up the necessary environments for the exercises in the rest of this course. 
+In this exercise you will set up the necessary environments for the exercises in the rest of this course. Before we even do that, let's talk about _what_ we're even going to be building. 
+
+The example streaming data pipeline that we're going to build during this course is driven by a stream of events arriving holding information about product ratings that users submit to our fictional company's website. 
+
+image::images/dp01-01x-01.png[Ratings data flowing into a Kafka topic]
+
+In reality the ratings would be written from the website to Kafka using the Producer API. For the purposes of our tutorial though, this data is going to come instead from a data generator that we'll set up in a later step. 
+
+Each of the ratings that we receive has a `user_id` field. We can use this to lookup information about the user so as to enrich the data we've received and take timely action on it. For example, each user has a name and contact details, and is also assigned a VIP status. If we have an important customer leave unhappy reviews then we probably want to take action so as to not risk them churning. The information about customers is held in a separate system - it's a fair bet that it's going to be a RDBMS of some sort. The general pattern to follow with streaming pipelines is to get the data into Kafka and join it to the events there. We'll get onto why this makes sense later on, and talk about exciting things like stream/table duality
+
+image::images/dp01-01x-02.png[Ratings and Customer Data]
+
+Using stream processing we can join each event that we've already received, and every new one that arrives, to its associated customer data. The resulting enriched information is written back into a Kafka topic, and then streamed to the target system where it can be used in an operational dashboard. 
+
+image::images/dp01-01x-03.png[The finished pipeline]
+
 
 ### Confluent Cloud
 
