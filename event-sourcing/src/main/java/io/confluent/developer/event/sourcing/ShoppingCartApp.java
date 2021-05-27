@@ -40,17 +40,19 @@ public class ShoppingCartApp {
     }
 
     private static ShoppingCartState aggregate(ShoppingCartAction newAction, ShoppingCartState oldState) {
-        ShoppingCartState newState = new ShoppingCartState(oldState.getCustomer(), oldState.getItems());
-        switch (newAction.getItem()) {
+        ShoppingCartState newState = new ShoppingCartState(newAction.getCustomer(), oldState.getItems());
+
+        switch (newAction.getAction()) {
             case "add":
                 newState.getItems().put(newAction.getItem(),
-                        oldState.getItems().getOrDefault(newAction.getItem(), 0L) + 1L);
+                  oldState.getItems().getOrDefault(newAction.getItem(), 0L) + 1L);
                 break;
             case "remove":
                 newState.getItems().put(newAction.getItem(),
-                        oldState.getItems().getOrDefault(newAction.getItem(), 0L) - 1L);
+                  oldState.getItems().getOrDefault(newAction.getItem(), 0L) - 1L);
                 break;
             case "checkout":
+                newState = oldState;
                 break;
         }
         return newState;
@@ -66,9 +68,10 @@ public class ShoppingCartApp {
             .groupByKey()
             .aggregate(
                     () -> new ShoppingCartState("", new HashMap<String, Long>()),
-                    (aggKey, newValue, aggValue) -> aggregate(newValue, aggValue),
+                    (aggKey, newAction, cartState) -> aggregate(newAction, cartState),
                         Materialized.with(stringSerde, stateSerde))
             .toStream()
+            .peek((k,v) -> System.out.println(v.toString()))
             .to(SHOPPING_CART_STATE_TOPIC_NAME, Produced.with(stringSerde, stateSerde));
 
         return builder.build();
