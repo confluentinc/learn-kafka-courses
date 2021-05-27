@@ -4,6 +4,7 @@
   "name": "ShoppingCartState",
   "fields": [
   { "name": "customer", "type": "string" },
+  { "name": "checkedOut", "type": "boolean" },
   { "name": "items",
     "type": {
         "type": "map",

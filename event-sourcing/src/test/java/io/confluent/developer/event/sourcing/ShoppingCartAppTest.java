@@ -34,12 +34,18 @@ public class ShoppingCartAppTest {
                     actionSerde.serializer());
 
             List.of(
-                    new ShoppingCartAction("yeva", "at1", "trousers", "add"),
-                    new ShoppingCartAction("yeva", "at2", "trousers", "add"),
-                    new ShoppingCartAction("yeva", "aj1", "jumpers", "add"),
-                    new ShoppingCartAction("yeva", "rt1", "trousers", "remove"),
-                    new ShoppingCartAction("yeva", "ah1", "hat", "add"),
-                    new ShoppingCartAction("yeva", "out", "", "checkout")
+                    new ShoppingCartAction("yeva", "trousers", "add"),
+                    new ShoppingCartAction("bill", "trousers", "add"),
+                    new ShoppingCartAction("yeva", "trousers", "add"),
+                    new ShoppingCartAction("yeva", "jumpers", "add"),
+                    new ShoppingCartAction("bill", "trousers", "add"),
+                    new ShoppingCartAction("bill", "jumpers", "add"),
+                    new ShoppingCartAction("yeva", "trousers", "remove"),
+                    new ShoppingCartAction("yeva", "hat", "add"),
+                    new ShoppingCartAction("bill", "trousers", "remove"),
+                    new ShoppingCartAction("yeva", "", "checkout"),
+                    new ShoppingCartAction("bill", "hat", "add"),
+                    new ShoppingCartAction("bill", "", "checkout")
             ).forEach( e -> shoppingCartTestTopic.pipeInput(e.getCustomer(), e) );
         }
     }

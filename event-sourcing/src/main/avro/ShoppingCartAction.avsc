@@ -4,7 +4,6 @@
   "name": "ShoppingCartAction",
   "fields": [
     {"name": "customer", "type": "string"},
-    {"name": "id", "type": "string"},
     {"name": "item", "type": "string"},
     {"name": "action", "type": "string"}
   ]

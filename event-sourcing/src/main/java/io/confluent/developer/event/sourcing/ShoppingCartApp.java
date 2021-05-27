@@ -39,7 +39,19 @@ public class ShoppingCartApp {
     }
 
     private static ShoppingCartState aggregate(ShoppingCartAction newAction, ShoppingCartState oldState) {
-        ShoppingCartState newState = new ShoppingCartState(newAction.getCustomer(), oldState.getItems());
+        Map<String, Long> items = null;
+        if (newAction.getAction().equals("checkout")) {
+            items = oldState.getItems();
+        } else if (oldState.getCheckedOut()) {
+            items = new HashMap<>();
+        } else {
+            items = oldState.getItems();
+        }
+
+        ShoppingCartState newState = new ShoppingCartState(
+          newAction.getCustomer(),
+          newAction.getAction().equals("checkout"),
+          oldState.getItems());
 
         switch (newAction.getAction()) {
             case "add":
@@ -50,9 +62,7 @@ public class ShoppingCartApp {
                 newState.getItems().put(newAction.getItem(),
                   oldState.getItems().getOrDefault(newAction.getItem(), 0L) - 1L);
                 break;
-            case "checkout":
-                newState = oldState; // TODO: What to do on the checkout action?
-                break;
+            //case "checkout": // No Action necessary, checkedout flag set above
         }
         return newState;
     }
@@ -64,13 +74,15 @@ public class ShoppingCartApp {
 
         builder
             .stream(SHOPPING_CART_EVENT_TOPIC_NAME, Consumed.with(stringSerde, eventSerde))
+            .peek((k,v) -> System.out.println(String.format("Action: %s", v)))
             .groupByKey()
             .aggregate(
-                    () -> new ShoppingCartState("", new HashMap<String, Long>()),
+                    () -> new ShoppingCartState("", false, new HashMap<String, Long>()),
                     (aggKey, newAction, cartState) -> aggregate(newAction, cartState),
                         Materialized.with(stringSerde, stateSerde))
-            .toStream()
-            .peek((k,v) -> System.out.println(v.toString()))
+            .toStream() // potentially drop anything
+            .filter((k,v) -> v.getCheckedOut())
+            .peek((k,v) -> System.out.println(String.format("Checked Out Cart : %s", v)))
             .to(SHOPPING_CART_STATE_TOPIC_NAME, Produced.with(stringSerde, stateSerde));
 
         return builder.build();
