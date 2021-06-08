@@ -1,6 +1,6 @@
 # Inside ksqlDB
 Robin Moffatt <robin@confluent.io>
-v1.00, 7 June 2021
+v1.01, 8 June 2021
 
 ## Exercise 1 - Stream-Table Joins
 
@@ -179,3 +179,7 @@ SELECT *
 image::images/ki01-12.png[Enriched stream results]
 
 With another editor window insert some more events into the `readings` stream and observe how the events are written to `enriched_readings` with the brand details added. 
+
+If you have access to the Data Lineage view on Confluent you can see a visual representation of what you've built: 
+
+image::images/ki01-13.png[Data Lineage view]
