@@ -1,0 +1,49 @@
+# Inside ksqlDB - Exercise narration & timecodes
+
+_See recording at https://drive.google.com/file/d/1gP7GcS-TgLNAntc-Jd6lGr_uX77fqa7O/view?usp=sharing_
+
+In this exercise you're going to see how you can join a stream of events with a table in ksqlDB. The stream is of readings from an car, and the table reference information about the sensors from which the readings are taken. 
+
+We're going to start off by creating the table and stream objects
+
+[options="header",cols="10%,~"]
+|=====================================================================================
+|Timecode| Narrative
+|00:22   | From your cluster's front page, navigate through to your ksqlDB application
+|00:31   | and in the ksqlDB editor run the CREATE STREAM statement. The Kafka topic will be created by ksqlDB if it doesn't exist already. 
+|00:38   | Make sure that the response from the statement running is SUCCESS, as shown in the text underneath
+|00:44   | Now create the table to hold information about the brand for each sensor. Just like the stream, it's backed by a Kafka topic that is created if it doesn't exist.
+|00:49   | As before, make sure that it completes successfully
+|00:53   | If you look on the right of the screen you'll see that the brands and readings table and stream are shown there
+2+|
+|00:55| With the objects created, we're now going to populate them. In practice the data that ksqlDB processes will usually be written into the underlying Kafka topic by an external application using the producer API, or by Kafka Connect or the REST proxy etc. Here we're going to take advantage of the INSERT INTO syntax that ksqlDB supports to write some data directly into the table, and the stream. 
+|01:02| Run these four INSERT INTO statements. You can run them as one execution. You won't get immediate feedback that the insert has succeeded, so let's query the table to make sure that the data's there
+|01:08| To query existing data in a stream or a table—and not just new data that arrives after the query starts—we need to set the *auto.offset.reset* parameter to *earliest*. In the ksqlDB web UI you do this with the dropdown menu. 
+|01:16| Now run a select against the table. It may take a short while to return data…        
+|01:58| …but when it does you should see the four rows that you inserted
+|02:03| You can toggle between columnar and individual display of the records using the icons to the top right
+2+|
+|02:15| Let's now write some events to the `readings` stream. As before, paste the `INSERT INTO` statements into the ksqlDB editor and click *Run query*. If the query from the insert to the table is still running then click *stop* first. 
+|02:21| When you click *Run query* the command will be executed and you'll see "Processing query…" appear briefly, but you won't get any other indication that it's run. That's OK, because we know that it has and can verify that on the next step. 
+|02:34| Let's just double check that the data did get inserted to the stream by running a `SELECT` from it. 
+|02:40| We'll make sure that *auto.offset.reset* parameter to *earliest* too
+|02:44| We can see that sure enough the events are present on the stream
+2+|
+|02:51| So now we're going go ahead and run the actual stream-table join. Here we're using an `INNER JOIN`, although we have the option of using `LEFT OUTER` joins instead if that's what we need from the data
+|02:53| The join is on the common key column called *`sensor`*. 
+|02:59| For every row on the source stream the value of `sensor` is matched to the brand name from the `brands` table and if a match is found the brand name is returned with the `readings` data 
+|03:11-03:44 | _Ed: screencap of resizing browser windows if we don't want a hard cut_
+|03:47| If we now open a second browser window and use it to insert some new events into the `readings` stream 
+|03:59| they appear in the query output of the join that's still running at the top of the screen
+2+|
+|04:05| So far we've just been writing the output of the join to the screen, which is useful for prototyping and refining a query. What we really want to do though is write this enriched data for all the events already on the stream, and every new one that arrives, onto a new stream. 
+
+For that we can use the `CREATE STREAM AS` statement on the front of our existing SQL
+|04:08| As before, we'll make sure that *auto.offset.reset* parameter is set to *earliest*
+|04:16| Once the stream is successfully created, we can query it 
+|04:34| The results are as we saw before when we ran the join query first. The difference this time is that the messages we see are coming from the enriched stream itself, to which the joined results have been written by ksqlDB
+|04:50| To show that the enriched stream that we're querying at the top is processing new events on the source too we will insert a new event in the second window at the bottom of the screen
+|04:59| As the event arrives on the source stream it's written almost straight away to the enriched stream and shown in the output at the top of the screen
+2+|
+|05:25| One of the next things that Confluent offers is the Data Lineage view. From here we can see how each topic relates to the other. <ad lib to talk about it if you want> 
+|=====================================================================================
