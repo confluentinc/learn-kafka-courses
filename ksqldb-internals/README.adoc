@@ -17,7 +17,7 @@ Before continuing, ensure that you have access to a Confluent Cloud cluster and 
 +
 image::images/ki01-01.png[Create a cluster in Confluent Cloud]
 
-4. Now go to the ksqlDB page within your Confluent Cloud cluster and click `Add application`. 
+3. Now go to the ksqlDB page within your Confluent Cloud cluster and click `Add application`. 
 +
 If prompted, select *Create application myself*. 
 +
@@ -144,7 +144,7 @@ INSERT INTO readings (sensor, reading, area) VALUES ('sensor-3',67,'engine');
 
 After a moment you should see the result of the stream-table join appear in the window in which you ran the `SELECT` statement:
 
-<image TODO>
+image::images/ki01-10.png[More stream-table join results]
 
 ### Persist the enriched events to a new stream
 
@@ -165,7 +165,7 @@ CREATE STREAM enriched_readings AS
   EMIT CHANGES;
 ----
 
-<image TODO> 
+image::images/ki01-11.png[CSAS]
 
 With the stream created, you can query it: 
 
@@ -175,5 +175,7 @@ SELECT *
   FROM enriched_readings 
   EMIT CHANGES;
 ----
+
+image::images/ki01-12.png[Enriched stream results]
 
 With another editor window insert some more events into the `readings` stream and observe how the events are written to `enriched_readings` with the brand details added. 
