@@ -1,6 +1,6 @@
 # Setting Up an Amazon RDS MySQL instance to Use with Confluent Cloud MySQL CDC Connector
 Robin Moffatt <robin@confluent.io>
-v0.02, 25 May 2021
+v0.03, 17 June 2021
 
 _To follow the Building Data Pipelines with Apache Kafka® and Confluent course exercises, you need a MySQL instance populated with the sample data and accessible from the internet. This short guide shows how to set this up on Amazon RDS_. 
 
@@ -94,4 +94,4 @@ mysql> show global variables like 'binlog_%';
 1 row in set (0.17 sec)
 ----
 +
-Note: If either is not what it should be based on the parameter set, you may need to reboot the database to make it take effect. You can do this from the main RDS page. 
+NOTE: If either is not what it should be based on the parameter set, you may need to reboot the database to make it take effect. You can do this from the main RDS page. 
