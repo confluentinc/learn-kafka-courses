@@ -4,7 +4,7 @@ This exercise is the culmination of a pipeline project that takes streams of rat
 
 ![Data Lineage](images/dp06-01-01.png)
 
-For the final step, we will stream the enriched data out to Elasticsearch from where it can be built into a dashboard. You need to have an Elasticsearch instance created as described in the first exercise &lt;INSERT NAME OF EXERCISE AND ADD ANCHOR LINK&gt;, and it must be accessible from the internet.
+For the final step, we will stream the enriched data out to Elasticsearch from where it can be built into a dashboard. You need to have an Elasticsearch instance created as described in the first exercise &lt;TODO: INSERT NAME OF EXERCISE AND ADD ANCHOR LINK&gt;, and it must be accessible from the internet.
 
 1.  In Confluent Cloud, click on the **Connectors** link, click **Add connector**, and search for the "Elasticsearch Service Sink" connector.
 
@@ -69,3 +69,5 @@ For the final step, we will stream the enriched data out to Elasticsearch from w
         Create visualizations to build a dashboard showing relevant details in the data.
 
         ![Kibana Dashboard](images/dp06-01-06.png)
+
+_Make sure that when you have finished the exercises in this course you use the Confluent Cloud UI or CLI to destroy all the resources you created. Verify they are destroyed to avoid unexpected charges._

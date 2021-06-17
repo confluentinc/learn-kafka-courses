@@ -67,5 +67,3 @@ In reality, the `ratings` topic would probably be populated from an application 
 
     ![New messages arriving on the ratings topic](images/dp02-01-05.png)
 
-TODO: `<Disclaimer / warning about costs incurred to go here>`
-

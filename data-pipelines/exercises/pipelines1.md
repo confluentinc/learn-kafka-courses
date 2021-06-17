@@ -54,7 +54,7 @@ For this course, you will use Confluent Cloud to provide a managed Kafka service
 
     The ksqlDB application will take a few minutes to provision.
 
-TODO: `<Disclaimer / warning about costs incurred to go here>`
+_Make sure that when you have finished the exercises in this course you use the Confluent Cloud UI or CLI to destroy all the resources you created. Verify they are destroyed to avoid unexpected charges._
 
 ## Source and Target Systems
 
@@ -62,6 +62,7 @@ This course uses a source MySQL database and target Elasticsearch instance. Both
 
 The provision and configuration of these systems is primarily outside the scope of this exercise. These could be run as managed services (for example, Amazon RDS and Elastic Cloud), or as self-hosted with the appropriate networking configured such that they can be connected to from the internet.
 
+Remember that if you are using a hosted service then there may be recurring costs associated with them. 
 ### MySQL
 
 You can [follow this guide](aws_rds_mysql.adoc) to set up an Amazon RDS managed MySQL instance.
@@ -75,5 +76,3 @@ Regardless of how you provision your MySQL database, [run this script](customers
 ### Elasticsearch
 
 You can run Elasticsearch yourself, or [use a managed service such as Elastic Cloud](https://www.elastic.co/cloud/elasticsearch-service/signup).
-
-TODO: `<Disclaimer / warning about costs incurred to go here>`

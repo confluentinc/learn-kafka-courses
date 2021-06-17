@@ -4,7 +4,7 @@ The ratings messages that we receive include a field that indicates the device f
 
 We’d like to create a new stream that includes only data from live devices. For this we can use ksqlDB.
 
-1.  Before continuing, make sure that you have created a ksqlDB application on Confluent Cloud as described in the first exercise &lt;INSERT NAME OF EXERCISE AND ADD ANCHOR LINK&gt;. From the "ksqlDB" page, you should see the application listed and in "Status" `Up`.
+1.  Before continuing, make sure that you have created a ksqlDB application on Confluent Cloud as described in the first exercise &lt;TODO: INSERT NAME OF EXERCISE AND ADD ANCHOR LINK&gt;. From the "ksqlDB" page, you should see the application listed and in "Status" `Up`.
 
     ![ksqlDB application in the list](images/dp04-01-01.png)
 
@@ -61,6 +61,4 @@ We’d like to create a new stream that includes only data from live devices. Fo
     Click on the topic. If data lineage is enabled on your cluster, click on it to view the flow of data that you’ve created.
 
     ![Data Lineage](images/dp04-01-08.png)
-
-TODO: `<Disclaimer / warning about costs incurred to go here>`
 

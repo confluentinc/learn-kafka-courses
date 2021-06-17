@@ -4,7 +4,7 @@ In this exercise, we’ll ingest information about the customers who are writing
 
 ## View Customer Data in MySQL
 
-1.  You should have created and populated a MySQL database in the exercise &lt;INSERT NAME OF EXERCISE AND ADD ANCHOR LINK&gt;. If you didn’t, please return to that step and complete it before proceeding.
+1.  You should have created and populated a MySQL database in the exercise &lt;TODO: INSERT NAME OF EXERCISE AND ADD ANCHOR LINK&gt;. If you didn’t, please return to that step and complete it before proceeding.
 
     Remember that the MySQL database needs to be accessible from the internet.
 
@@ -90,6 +90,4 @@ Click on **Save & create**.
     You should then see messages present on the topic.
 
     ![Messages on the customers topic](images/dp03-01-04.png)
-
-TODO: `<Disclaimer / warning about costs incurred to go here>`
 

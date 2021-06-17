@@ -84,5 +84,3 @@ To do this, we need to first model the customer data held in the Kafka topic in 
 
     From here, you can see where the data comes from, its relative throughput volumes, and the stages of processing that it goes through.
 
-TODO: `<Disclaimer / warning about costs incurred to go here>`
-
