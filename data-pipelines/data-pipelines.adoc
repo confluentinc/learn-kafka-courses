@@ -1,8 +1,8 @@
-# Building Data Pipelines with Apache Kafka® and Confluent
+= Building Data Pipelines with Apache Kafka® and Confluent
 Robin Moffatt <robin@confluent.io>
 v1.25, 17 June 2021
 
-## Module 1 / Exercise 1 - Introduction
+== Module 1 / Exercise 1 - Introduction
 
 In this exercise, you will set up the necessary environments for the exercises in the rest of this course. Before we even do that, let's talk about _what_ we're even going to be building. 
 
@@ -21,7 +21,7 @@ Using stream processing, we can join each event that we've already received, and
 image::images/dp01-01x-03.png[The finished pipeline]
 
 
-### Confluent Cloud
+=== Confluent Cloud
 
 For this course, you will use Confluent Cloud to provide a managed Kafka service, connectors, and stream processing. 
 
@@ -61,13 +61,13 @@ The ksqlDB application will take a few minutes to provision.
 
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
-### Source and Target Systems
+=== Source and Target Systems
 
 This course uses a source MySQL database and target Elasticsearch instance. Both of these should be accessible from the internet. 
 
 The provision and configuration of these systems is primarily outside the scope of this exercise. These could be run as managed services (for example, Amazon RDS and Elastic Cloud), or as self-hosted with the appropriate networking configured such that they can be connected to from the internet. 
 
-#### MySQL 
+==== MySQL 
 
 You can link:aws_rds_mysql.adoc[follow this guide] to set up an Amazon RDS managed MySQL instance. 
 
@@ -80,18 +80,18 @@ Regardless of how you provision your MySQL database, link:customers.sql[run this
 mysql -u admin -h $MYSQL_HOST -p < customers.sql
 ----
 
-#### Elasticsearch
+==== Elasticsearch
 
 You can run Elasticsearch yourself, or https://www.elastic.co/cloud/elasticsearch-service/signup[use a managed service such as Elastic Cloud].
 
 ''''
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
-## Module 2 / Exercise 1 - Kafka Connect
+== Module 2 / Exercise 1 - Kafka Connect
 
 In this exercise, you will create a new topic to hold ratings event data, and set up a data generator to populate the topic. 
 
-### Create the `ratings` Topic
+=== Create the `ratings` Topic
 
 From the *Topics* page of your Confluent Cloud cluster, click on *Add topic*. 
 
@@ -101,7 +101,7 @@ image::images/dp02-01-01.png[Creating a new topic]
 
 Click on *Create with defaults*. 
 
-### Create a Data Generator with Kafka Connect
+=== Create a Data Generator with Kafka Connect
 
 In reality, the `ratings` topic would probably be populated from an application using the producer API to write messages to it. Here we're going to use a data generator that's available as a connector for Kafka Connect. 
 
@@ -171,11 +171,11 @@ image::images/dp02-01-05.png[New messages arriving on the ratings topic]
 ''''
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
-## Module 3 / Exercise 1 - Kafka and Change Data Capture (CDC)
+== Module 3 / Exercise 1 - Kafka and Change Data Capture (CDC)
 
 In this exercise, we'll ingest information about the customers who are writing the rating messages created in the previous exercise. The customer data is held in a MySQL database. 
 
-### View Customer Data in MySQL
+=== View Customer Data in MySQL
 
 1. You should have created and populated a MySQL database in the exercise <INSERT NAME OF EXERCISE AND ADD ANCHOR LINK>. If you didn't, please return to that step and complete it before proceeding. 
 +
@@ -200,7 +200,7 @@ mysql> SELECT first_name, last_name, email, club_status FROM demo.CUSTOMERS LIMI
 +
 If necessary, return to the first exercise to populate the data into your database. 
 
-### Create a Topic for Customer Data
+=== Create a Topic for Customer Data
 
 Whilst the MySQL connector can create the target topic for the data that it ingests, we need to create it with certain configuration properties and therefore will create it explicitly first. This is in general a good practice anyway. 
 
@@ -214,7 +214,7 @@ image::images/dp03-01-01.png[Creating a new customers topic]
 
 Click on *Save & create*.
 
-### Create the MySQL connector
+=== Create the MySQL connector
 
 1. From the "Connectors" page in Confluent Cloud, click on *Add connector* and search for the "MySQL CDC Source" connector. 
 +
@@ -296,7 +296,7 @@ image::images/dp03-01-04.png[Messages on the customers topic]
 ''''
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
-## Module 4 / Exercise 1 - Filtering Streams of Data
+== Module 4 / Exercise 1 - Filtering Streams of Data
 
 The ratings messages that we receive include a field that indicates the device from which they were left. The field is called `channel` and includes some values indicating that they're from test devices. 
 
@@ -378,7 +378,7 @@ image::images/dp04-01-08.png[Data Lineage]
 ''''
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
-## Module 5 / Exercise 1 - Enriching Events Using ksqlDB
+== Module 5 / Exercise 1 - Enriching Events Using ksqlDB
 
 In the previous exercise, we filtered a stream of ratings events to create a new one that excluded test messages. Now we're going to use the customer information that we are pulling in from an external MySQL database to enrich each rating as it arrives (as well as all the existing ratings that we have already received and are storing on the Kafka topic). 
 
@@ -473,7 +473,6 @@ SELECT CUSTOMER_ID, FULL_NAME, CLUB_STATUS, STARS, MESSAGE
  WHERE CUSTOMER_ID=1
   EMIT CHANGES;
 ----
-
 +
 image::images/dp05-01-06.png[Club status automagically picked up from MySQL 🎉]
 
@@ -486,7 +485,7 @@ From here, you can see where the data comes from, its relative throughput volume
 ''''
 TODO: `<Disclaimer / warning about costs incurred to go here>`
 
-## Module 6 / Exercise 1 - Streaming Data to External Systems
+== Module 6 / Exercise 1 - Streaming Data to External Systems
 
 This exercise is the culmination of a pipeline project that takes streams of ratings events, filters them, and enriches them with information about the customer using data streamed from a database. 
 
