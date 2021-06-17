@@ -1,6 +1,6 @@
 # Building Data Pipelines with Apache Kafka® and Confluent
 Robin Moffatt <robin@confluent.io>
-v1.20, 27 May 2021
+v1.25, 17 June 2021
 
 ## Module 1 / Exercise 1 - Introduction
 
@@ -39,7 +39,7 @@ image::images/dp01-01-13.png[Create topic available]
 
 4. Next, you need to create a Confluent Schema Registry for your environment. 
 +
-Note: If you already have a Schema Registry in your Confluent Cloud environment, you can skip this step. 
+NOTE: If you already have a Schema Registry in your Confluent Cloud environment, you can skip this step. 
 +
 ** From the *Schema Registry* option on your environment's homepage (or from the left-hand navigation on the "Cluster" page), click on *Set up on my own*. 
 +
@@ -222,7 +222,7 @@ image::images/dp03-01-06.png[Searching for the MySQL CDC connector on Confluent 
 +
 Click on the connector to add it.
 +
-Note: Make sure you select the *MySQL CDC Source* and _not_ the similarly named "MySQL Source" connector. 
+NOTE: Make sure you select the *MySQL CDC Source* and _not_ the similarly named "MySQL Source" connector. 
 
 2. Configure the connector like so:
 +
