@@ -34,7 +34,7 @@ For this course, you will use Confluent Cloud to provide a managed Kafka service
 
 4.  Next, you need to create a Confluent Schema Registry for your environment.
 
-    If you already have a Schema Registry in your Confluent Cloud environment, you can skip this step.
+    > ℹ️ If you already have a Schema Registry in your Confluent Cloud environment, you can skip this step.
 
     -   From the **Schema Registry** option on your environment’s homepage (or from the left-hand navigation on the "Cluster" page), click on **Set up on my own**.
 
@@ -48,30 +48,29 @@ For this course, you will use Confluent Cloud to provide a managed Kafka service
 
     If prompted, select **Create application myself**.
 
-    Leave the *access control* set to "Global access." Make the *application name* 'pipelines-quickstart-ksqldb\`, and leave the *number of streaming units* set to "4."
+    Leave the *access control* set to "Global access." Make the *application name* `pipelines-quickstart-ksqldb`, and leave the *number of streaming units* set to "4."
 
     ![Creating a ksqlDB application in Confluent Cloud](images/dp01-01-02.png)
 
     The ksqlDB application will take a few minutes to provision.
 
-_Make sure that when you have finished the exercises in this course you use the Confluent Cloud UI or CLI to destroy all the resources you created. Verify they are destroyed to avoid unexpected charges._
+<div style="padding: 15px; border: 1px solid transparent; border-color: transparent; margin-bottom: 20px; border-radius: 4px; color: #8a6d3b;; background-color: #fcf8e3; border-color: #faebcc;">
+Make sure that when you have finished the exercises in this course you use the Confluent Cloud UI or CLI to destroy all the resources you created. Verify they are destroyed to avoid unexpected charges.
+</div>
 
 ## Source and Target Systems
 
 This course uses a source MySQL database and target Elasticsearch instance. Both of these should be accessible from the internet.
 
 The provision and configuration of these systems is primarily outside the scope of this exercise. These could be run as managed services (for example, Amazon RDS and Elastic Cloud), or as self-hosted with the appropriate networking configured such that they can be connected to from the internet.
-
-Remember that if you are using a hosted service then there may be recurring costs associated with them. 
 ### MySQL
 
-You can [follow this guide](aws_rds_mysql.adoc) to set up an Amazon RDS managed MySQL instance.
+You can [follow this guide](https://github.com/confluentinc/learn-kafka-courses/blob/main/data-pipelines/aws_rds_mysql.adoc) to set up an Amazon RDS managed MySQL instance.
 
-Regardless of how you provision your MySQL database, [run this script](customers.sql) to create the table and data used in this course. If you’re using the `mysql` CLI, you can do it like this:
+Regardless of how you provision your MySQL database, [run this script](https://github.com/confluentinc/learn-kafka-courses/blob/main/data-pipelines/customers.sql) to create the table and data used in this course. If you’re using the `mysql` CLI, you can do it like this:
 
-    # Note: perhaps this can be done with a curl to pull the `customers.sql` file down
-    #       from GitHub directly?
-    mysql -u admin -h $MYSQL_HOST -p < customers.sql
+    https://raw.githubusercontent.com/confluentinc/learn-kafka-courses/main/data-pipelines/customers.sql | \
+      mysql -u admin -h $MYSQL_HOST -p
 
 ### Elasticsearch
 

@@ -85,7 +85,9 @@ Click on **Save & create**.
 
 5.  From the "Topics" list, click on `mysql01.demo.CUSTOMERS` and then **Messages**. Because there is currently only a static set of data in MySQL, there is not a stream of new messages arriving on the topic to view.
 
-    Click on **offset**, enter "0," and select the first option on the list. image::images/dp03-01-03.png\[Resetting the offset on the topic\]
+    Click on **offset**, enter "0," and select the first option on the list. 
+    
+    ![Resetting the offset on the topic](images/dp03-01-03.png)
 
     You should then see messages present on the topic.
 
