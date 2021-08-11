@@ -46,26 +46,41 @@ import java.util.Scanner;
 
 public class TransactionalProducer {
 
-  // Create topic in Confluent Cloud
-  public static void createTopic(final String topic,
-                          final Properties cloudConfig) {
-      final NewTopic newTopic = new NewTopic(topic, Optional.empty(), Optional.empty());
-      try (final AdminClient adminClient = AdminClient.create(cloudConfig)) {
-          adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
-      } catch (final InterruptedException | ExecutionException e) {
-          // Ignore if TopicExistsException, which may be valid if topic exists
-          if (!(e.getCause() instanceof TopicExistsException)) {
-              throw new RuntimeException(e);
-          }
-      }
+  public static final String TOPIC_NAME = "transaction-topic";
+  public static final int NUM_PARTITIONS = 1;
+  public static final short REP_FACTOR = 3;
+
+  // Load Confluent Cloud properties from config file
+  public static Properties loadConfig(final String configFile) throws IOException {
+    if (!Files.exists(Paths.get(configFile))) {
+      throw new IOException(configFile + " not found.");
+    }
+    final Properties cfg = new Properties();
+    try (InputStream inputStream = new FileInputStream(configFile)) {
+      cfg.load(inputStream);
+    }
+    return cfg;
   }
+
+  // Create topic in Confluent Cloud
+  public static void createTopic(final Properties cloudConfig) {
+    final NewTopic newTopic = new NewTopic(TOPIC_NAME, NUM_PARTITIONS, REP_FACTOR);
+    try (final AdminClient adminClient = AdminClient.create(cloudConfig)) {
+        adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
+    } catch (final InterruptedException | ExecutionException e) {
+        // Ignore if TopicExistsException, which may be valid if topic exists
+        if (!(e.getCause() instanceof TopicExistsException)) {
+            throw new RuntimeException(e);
+        }
+    }
+}
 
   public static void main(final String[] args) throws IOException {
 
 		Scanner in = new Scanner(System.in);
 
-    if (args.length != 3) {
-      System.out.println("Please provide command line arguments: configPath topic transactional_id");
+    if (args.length != 2) {
+      System.out.println("Please provide command line arguments: configPath transactional_id");
       System.exit(1);
     }
 
@@ -76,15 +91,14 @@ public class TransactionalProducer {
     final Properties props = loadConfig(args[0]);
 
     // Create topic if needed
-    final String topic = args[1];
-    createTopic(topic, props);
+    createTopic(props);
 
     // Add additional properties.
     props.put(ProducerConfig.ACKS_CONFIG, "all");
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
     props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-    props.put("transactional.id", args[2]);
-    props.put("transaction.timeout.ms", "20000");
+    props.put("transactional.id", args[1]);
+    props.put("transaction.timeout.ms", "30000");
 
     Producer<String, String> producer = new KafkaProducer<>(props);
 
@@ -118,17 +132,6 @@ public class TransactionalProducer {
     }
     in.close();
     producer.close();
-  }
-
-  public static Properties loadConfig(final String configFile) throws IOException {
-    if (!Files.exists(Paths.get(configFile))) {
-      throw new IOException(configFile + " not found.");
-    }
-    final Properties cfg = new Properties();
-    try (InputStream inputStream = new FileInputStream(configFile)) {
-      cfg.load(inputStream);
-    }
-    return cfg;
   }
 
 }
