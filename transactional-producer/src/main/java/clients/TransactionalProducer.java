@@ -18,13 +18,10 @@ package clients;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.Producer;
 
 import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 
 import org.apache.kafka.common.KafkaException;
@@ -40,8 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class TransactionalProducer {
@@ -95,10 +90,10 @@ public class TransactionalProducer {
 
     // Add additional properties.
     props.put(ProducerConfig.ACKS_CONFIG, "all");
-    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-    props.put("transactional.id", args[1]);
-    props.put("transaction.timeout.ms", "30000");
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, args[1]);
+    props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "30000");
 
     Producer<String, String> producer = new KafkaProducer<>(props);
 
