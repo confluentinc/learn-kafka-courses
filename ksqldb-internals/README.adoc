@@ -11,7 +11,7 @@ Before continuing, ensure that you have access to a Confluent Cloud cluster and 
 [NOTE]
 ====
 
-1. Go to https://www.confluent.io/confluent-cloud/tryfree?utm_source=learnkafka&NEEDTODOTHERESTOFTHEUTMCODE[Confluent Cloud]. If you don't already have a Confluent Cloud account you can create one here. Use promotion code `<TBC>` for money off your cloud bill.  
+1. Go to https://www.confluent.io/confluent-cloud/tryfree?utm_source=learnkafka&NEEDTODOTHERESTOFTHEUTMCODE[Confluent Cloud] and sign up for an account if you don't already have one. You can use the promo code `KSQLDB101` for $101 of free usage.  
 
 2. Create a new cluster in Confluent Cloud. For the purposes of this exercise you can use the `Basic` type. Name the cluster `inside-ksqldb`. 
 +
