@@ -1,4 +1,4 @@
-package io.confluent.developer.basic;
+package io.confluent.developer.serdes.solution;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -12,13 +12,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class BasicStreams {
+public class StreamsSerdes {
 
     public static void main(String[] args) throws IOException {
-        Properties streamsProps = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/main/resources/streams.properties")) {
-            streamsProps.load(fis);
-        }
+        final Properties streamsProps = new Properties();
+        streamsProps.load(new FileInputStream("src/main/resources/streams.properties"));
         streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "basic-streams");
 
         StreamsBuilder builder = new StreamsBuilder();
@@ -28,17 +26,14 @@ public class BasicStreams {
         final String orderNumberStart = "orderNumber-";
         KStream<String, String> firstStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), Serdes.String()));
 
-        firstStream.peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value))
-                   .filter((key, value) -> value.contains(orderNumberStart))
-                   .mapValues(value -> value.substring(value.indexOf("-") + 1))
-                   .filter((key, value) -> Long.parseLong(value) > 1000)
-                   .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
-                   .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+        firstStream.filter((key, value) -> value.contains(orderNumberStart))
+                .mapValues(value -> value.substring(value.indexOf(orderNumberStart)))
+                .filter((key, value) -> Long.parseLong(value) > 1000)
+                .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        
-        TopicLoader.runProducer();
-
         kafkaStreams.start();
     }
+
+
 }

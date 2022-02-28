@@ -1,7 +1,8 @@
-package io.confluent.developer.time;
+package io.confluent.developer.time.solution;
 
 import io.confluent.developer.StreamsUtils;
 import io.confluent.developer.avro.ElectronicOrder;
+import io.confluent.developer.time.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.Serdes;

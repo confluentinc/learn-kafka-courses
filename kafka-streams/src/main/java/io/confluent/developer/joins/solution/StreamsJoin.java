@@ -1,10 +1,11 @@
-package io.confluent.developer.joins;
+package io.confluent.developer.joins.solution;
 
 import io.confluent.developer.StreamsUtils;
 import io.confluent.developer.avro.ApplianceOrder;
 import io.confluent.developer.avro.CombinedOrder;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.developer.avro.User;
+import io.confluent.developer.joins.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;

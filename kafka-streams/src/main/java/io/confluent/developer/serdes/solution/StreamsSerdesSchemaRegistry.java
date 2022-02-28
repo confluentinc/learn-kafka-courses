@@ -1,4 +1,4 @@
-package io.confluent.developer.serdes;
+package io.confluent.developer.serdes.solution;
 
 import io.confluent.developer.avro.ProcessedOrder;
 import io.confluent.developer.avro.ProductOrder;

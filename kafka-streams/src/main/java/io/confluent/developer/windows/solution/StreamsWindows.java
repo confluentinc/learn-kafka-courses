@@ -1,7 +1,8 @@
-package io.confluent.developer.windows;
+package io.confluent.developer.windows.solution;
 
 import io.confluent.developer.StreamsUtils;
 import io.confluent.developer.avro.ElectronicOrder;
+import io.confluent.developer.windows.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
