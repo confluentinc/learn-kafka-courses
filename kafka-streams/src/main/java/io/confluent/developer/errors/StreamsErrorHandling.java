@@ -32,10 +32,14 @@ public class StreamsErrorHandling {
         public DeserializationHandlerResponse handle(ProcessorContext context,
                                                      ConsumerRecord<byte[], byte[]> record,
                                                      Exception exception) {
-            if (errorCounter++ < 25) {
-                return DeserializationHandlerResponse.CONTINUE;
-            }
-            return DeserializationHandlerResponse.FAIL;
+            // This return null statement is here so the code will compile
+            // You need to replace it with some logic described below
+            return null;
+            // If the number of errors remain under 25 continue processing
+            // Otherwise fail
+            // Note in both cases you'll return a DeserializationHandlerResponse ENUM
+            // To achieve the desired behavior
+
         }
 
         @Override
@@ -46,10 +50,12 @@ public class StreamsErrorHandling {
         @Override
         public ProductionExceptionHandlerResponse handle(ProducerRecord<byte[], byte[]> record,
                                                          Exception exception) {
-            if (exception instanceof RecordTooLargeException ) {
-                return ProductionExceptionHandlerResponse.CONTINUE;
-            }
-            return ProductionExceptionHandlerResponse.FAIL;
+            // This return null statement is here so the code will compile
+            // You need to replace it with some logic described below
+            return null;
+            // If the exception type is RecordTooLargeException continue working
+            // Otherwise fail
+            // Note in both cases you'll return a ProductionExceptionHandlerResponse ENUM
         }
 
         @Override
@@ -59,13 +65,16 @@ public class StreamsErrorHandling {
     public static class StreamsCustomUncaughtExceptionHandler implements StreamsUncaughtExceptionHandler {
         @Override
         public StreamThreadExceptionResponse handle(Throwable exception) {
-            if (exception instanceof StreamsException) {
-                Throwable originalException = exception.getCause();
-                if (originalException.getMessage().equals("Retryable transient error")) {
-                    return StreamThreadExceptionResponse.REPLACE_THREAD;
-                }
-            }
-            return StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
+            // This return null statement is here so the code will compile
+            // You need to replace it with some logic described below
+            return null;
+            
+            // Check if the exception is a StreamsException
+            // If it is - get the underlying Throwable HINT: exception.getCause()
+            // Then check if the error message equals "Retryable transient error"
+            // If it does, replace the thread
+            // Otherwise shutdown the client
+            // Note in both cases return a StreamThreadExceptionResponse ENUM
         }
     }
 
@@ -73,12 +82,14 @@ public class StreamsErrorHandling {
         final Properties streamsProps = StreamsUtils.loadProperties();
         streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-error-handling");
 
-        streamsProps.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
-                StreamsDeserializationErrorHandler.class);
-        streamsProps.put(StreamsConfig.DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG,
-                StreamsRecordProducerErrorHandler.class);
+        // Set the deserialization exception handler and the production exception handler
+        // on the streamsProps object
+        // HINT: look in StreamsConfig for Deserialization and Production to get the correct
+        // static string configuration names
 
-
+        streamsProps.put("????", null);
+        streamsProps.put("???", null);
+        
         StreamsBuilder builder = new StreamsBuilder();
         final String inputTopic = streamsProps.getProperty("error.input.topic");
         final String outputTopic = streamsProps.getProperty("error.output.topic");
@@ -101,7 +112,8 @@ public class StreamsErrorHandling {
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        kafkaStreams.setUncaughtExceptionHandler(new StreamsCustomUncaughtExceptionHandler());
+        // Set an UncaughtExceptionHandler on Kafka Streams HINT: It should be type of StreamsUncaughtExceptionHandler
+        // kafkaStreams.set...
         TopicLoader.runProducer();
         kafkaStreams.start();
     }

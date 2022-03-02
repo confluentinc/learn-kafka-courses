@@ -31,13 +31,9 @@ public class StreamsAggregate {
         final SpecificAvroSerde<ElectronicOrder> electronicSerde =
                 StreamsUtils.getSpecificAvroSerde(configMap);
 
-        final KStream<String, ElectronicOrder> electronicStream = null;
-              // Using the StreamsBuilder from above, create a KStream with an input-topic
-              // and a Consumed instance with the correct
-              // Serdes for the key, Serdes.String() and the value electronicSerde created above
-
-              // To view the key-value records coming into the application consider
-              //  adding this statement to the KStream .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+        final KStream<String, ElectronicOrder> electronicStream =
+                builder.stream(inputTopic, Consumed.with(Serdes.String(), electronicSerde))
+                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
 
               // Now take the electronicStream object, group by key and perform an aggregation
               // Don't forget to convert the KTable returned by the aggregate call back to a KStream using the toStream method
@@ -47,8 +43,7 @@ public class StreamsAggregate {
               // right after the toStream() method .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
 
               // Finally write the results to an output topic
-              // using a KStream.to method with a Produced config object
-              // and the appropriate Serdes for the key Serdes.String()  and the value Serdes.Long()
+              //  .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
         TopicLoader.runProducer();

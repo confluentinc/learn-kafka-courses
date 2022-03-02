@@ -26,14 +26,17 @@ public class BasicStreams {
         final String outputTopic = streamsProps.getProperty("basic.output.topic");
 
         final String orderNumberStart = "orderNumber-";
-        KStream<String, String> firstStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), Serdes.String()));
+        // Using the StreamsBuilder from above, create a KStream with an input-topic
+        // and a Consumed instance with the correct
+        // Serdes for the key and value HINT: builder.stream and Serdes.String()
+        KStream<String, String> firstStream = null;
 
         firstStream.peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value))
-                   .filter((key, value) -> value.contains(orderNumberStart))
-                   .mapValues(value -> value.substring(value.indexOf("-") + 1))
-                   .filter((key, value) -> Long.parseLong(value) > 1000)
-                   .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
-                   .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+                   // filter records by making sure they contain the orderNumberStart variable from above HINT: use filter
+                   // map the value to a new string by removing the orderNumberStart portion HINT: use mapValues
+                   // only forward records where the value is 1000 or greater HINT: use filter and Long.parseLong
+                   .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value));
+                   //Write the results to an output topic defined above as outputTopic HINT: use "to" and Produced and Serdes.String()
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
         
