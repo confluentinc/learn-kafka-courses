@@ -4,6 +4,9 @@ This is the code repo containing the full solutions to the exercises
 for the Kafka Streams course.  To get started you'll need to sign up
 for a CCloud account.  Follow the steps below to get everything ready to go.
 
+It's recommended that you do these exercises while following along with the [Kafka Streams 101 course](https://developer.confluent.io/learn-kafka/kafka-streams/get-started/).
+The link for each module of the course related to the exercise description will be provided.
+
 ##  Confluent Cloud
  
 1. Go to [Confluent Cloud](https://www.confluent.io/confluent-cloud/tryfree?utm_source=learnkafka). 
@@ -94,8 +97,11 @@ Record produced - offset - 0 timestamp - 1622133855705
 Record produced - offset - 1 timestamp - 1622133855717 
 Record produced - offset - 2 timestamp - 1622133855717 
 ```
+Each exercise is incomplete, and it's up to you to follow the instructions and hints in the comments to get each application into running shape.  There's also a `solution` directory in each module that contains the fully completed example for you compare with your version or to help you if you get stuck.
 
 #### Basic Operations
+
+It's recommended to watch the [Basic Operations lecture](https://developer.confluent.io/learn-kafka/kafka-streams/basic-operations/) and the [Hands On: Basic Operations](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-basic-operations/) videos first.
 
 The basic operations exercise demonstrates using Kafka Streams stateless operations like `filter` and `mapValues`. 
 You run the basic operations example with this command ` ./gradlew runStreams -Pargs=basic` and your output on the console should resemble this:
@@ -115,6 +121,7 @@ Outgoing record - key order-key value 8400
 Take note that it's expected to not have a corresponding output record for each input record due to the filters applied by the Kafka Steams application.
 
 #### KTable 
+It's recommended to watch the [KTable lecture](https://developer.confluent.io/learn-kafka/kafka-streams/ktable/) and the [Hands On: KTable](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-ktable/) videos first.
 
 This exercise is a gentle introduction to the Kafka Streams `KTable` abstraction.  This example uses the same topology as the `basic` example, but your expected output
 is different due to fact that a `KTable` is an update-stream, and records with the same key are considered updates to previous records.  The default behavior 
@@ -128,6 +135,8 @@ NOTE: Since the default behavior for materialized `KTable`s is to emit changes o
 to let this application run for roughly 40 seconds to see a result.
 
 #### Joins
+
+It's recommended to watch the [Joins lecture](https://developer.confluent.io/learn-kafka/kafka-streams/joins/) and the [Hands On: Joins](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-joins/) videos first.
 
 The Joins exercise creates a join between two `KStream` objects resulting in a new `KStream` which is 
 further joined against a `KTable`.  You'll see the input records for the two `KStream`s , the results of the 
@@ -147,6 +156,8 @@ Stream-Table Join record key 10261999 value {"electronic_order_id": "remodel-2",
 
 #### Aggregation
 
+It's recommended to watch the [Stateful operations](https://developer.confluent.io/learn-kafka/kafka-streams/stateful-operations/) and the [Hands On: Aggregations](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-aggregations/) videos first.
+
 This exercise demonstrates an aggregation of a simulated stream of electronic purchase. You'll see the incoming records
 on the console along with the aggregation results:
 
@@ -160,6 +171,8 @@ Outgoing record - key HDTV-2333 value 9833.21
 NOTE that you'll need to let the streams application run for ~40 seconds to see the aggregation result
 
 #### Windowing
+
+It's recommended to watch the [Windowing](https://developer.confluent.io/learn-kafka/kafka-streams/windowing/) and the [Hands On: Windowing](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-windowing/) videos before attempting the exercises.
 
 This exercise uses top aggregation exercise, but adds windowing to it.  You'll use slightly different input
 records, and your output should look something like this:
@@ -180,6 +193,8 @@ Two things to note about this example:
 2. You need to let the application run for ~40 seconds to see the windowed aggregated output
 
 #### Time Concepts
+
+It's recommended to watch the [Time Concepts](https://developer.confluent.io/learn-kafka/kafka-streams/time-concepts/) and the [Hands On: Time Concepts](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-time-concepts/) videos before moving on to the exercises.
 
 The time concepts exercise uses an aggregation with windowing.  However, this example uses a custom 
 `TimestampExtractor` to use timestamps embedded in the record itself (event time) to drive the behavior of Kafka Steams
@@ -206,6 +221,8 @@ Two things to note about this example:
 
 #### Processor API
 
+It's recommended to watch the [Processor API](https://developer.confluent.io/learn-kafka/kafka-streams/processor-api/) and [Hands On: Processor API](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-processor-api/) videos before moving on to the exercises.
+
 This exercise covers working with the Processor API.  The application creates an aggregation but uses a punctuation every 30 seconds
 (stream-time) to emit records.  The results should look like this:
 ```text
@@ -222,6 +239,8 @@ Note that for this example the timestamps have been modified to advance stream-t
 The output here does not reflect what you would see on a production system.
 
 #### Error Handling
+
+It's recommended to watch the [Error Handling](https://developer.confluent.io/learn-kafka/kafka-streams/error-handling/) and [Hands On: Error Handling](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-error-handling/) videos before attempting the exercises.
 
 The error handling exercise injects a simulated transient error. The Kafka Streams `StreamsUncaughtExceptionHandler` 
 examines the exception and returns a `StreamThreadExceptionResponse.REPLACE_THREAD` response that allows the application
@@ -245,6 +264,8 @@ Outgoing record - key order-key value 8400
 ```
 
 #### Testing
+
+It's recommended to watch the [Testing](https://developer.confluent.io/learn-kafka/kafka-streams/testing/) and the [Hands On: Testing](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-testing/) videos before attempting the exercises.
 
 To run the unit test with the `TopologyTestDriver` you can either execute `./gradlew test` from the root of the project
 or run the `io.confluent.developer.aggregate.StreamsAggregateTest` from a test runner in your IDE.
