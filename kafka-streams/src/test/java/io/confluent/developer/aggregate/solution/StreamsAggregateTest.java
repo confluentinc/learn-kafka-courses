@@ -1,4 +1,4 @@
-package io.confluent.developer.aggregate;
+package io.confluent.developer.aggregate.solution;
 
 import io.confluent.developer.StreamsUtils;
 import io.confluent.developer.avro.ElectronicOrder;
@@ -51,34 +51,25 @@ public class StreamsAggregateTest {
                 Materialized.with(stringSerde, doubleSerde))
                 .toStream().to(outputTopicName, Produced.with(Serdes.String(), Serdes.Double()));
 
-           // Need to create the TopologyTestDriver instance
-           // You'll need a Topology and properties HINT: StreamBuilder.build() and streamsProps
-           // You always want to use a TopologyTestDriver in a try-with-resources block to make sure
-           // gets closed properly which will ensure any local state is cleaned up
-        try (final TopologyTestDriver testDriver = null) {
-            // Complete the TestInputTopic HINT: it needs a topic name and serializers for the key and value
-            final TestInputTopic<String, ElectronicOrder> inputTopic = null;
+        try (final TopologyTestDriver testDriver = new TopologyTestDriver(builder.build(), streamsProps)) {
+            final TestInputTopic<String, ElectronicOrder> inputTopic =
+                    testDriver.createInputTopic(inputTopicName,
+                            stringSerde.serializer(),
+                            electronicSerde.serializer());
+            final TestOutputTopic<String, Double> outputTopic =
+                    testDriver.createOutputTopic(outputTopicName,
+                            stringSerde.deserializer(),
+                            doubleSerde.deserializer());
 
-            // Complete the TestOutputTopic HINT: it needs a topic name and deserializers for the key and value
-            final TestOutputTopic<String, Double> outputTopic =  null;
-
-            // Mock records for the test
             final List<ElectronicOrder> orders = new ArrayList<>();
             orders.add(ElectronicOrder.newBuilder().setElectronicId("one").setOrderId("1").setUserId("vandeley").setTime(5L).setPrice(5.0).build());
             orders.add(ElectronicOrder.newBuilder().setElectronicId("one").setOrderId("2").setUserId("penny-packer").setTime(5L).setPrice(15.0).build());
             orders.add(ElectronicOrder.newBuilder().setElectronicId("one").setOrderId("3").setUserId("romanov").setTime(5L).setPrice(25.0).build());
 
-            // The expected values of the aggregation - in the TopologyTestDriver there's no caching
-            // so, you get every update, and you want to verify all of them
             List<Double> expectedValues = List.of(5.0, 20.0, 45.0);
-
-            // Run the mock records through the topology HINT use the inputTopic above
-            // and pipe each record through make sure to use the key of the order
-
-            // Read the values from the topology HINT use the outputTopic to read all values as list
-            List<Double> actualValues = null;
-            // assert the actualValues return matches the expected values
-            // HINT assertEquals(expected, actual);
+            orders.forEach(order -> inputTopic.pipeInput(order.getElectronicId(), order));
+            List<Double> actualValues = outputTopic.readValuesToList();
+            assertEquals(expectedValues, actualValues);
         }
 
     }
