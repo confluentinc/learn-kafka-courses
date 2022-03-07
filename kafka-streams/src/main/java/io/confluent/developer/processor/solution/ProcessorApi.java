@@ -1,6 +1,7 @@
-package io.confluent.developer.processor;
+package io.confluent.developer.processor.solution;
 
 import io.confluent.developer.avro.ElectronicOrder;
+import io.confluent.developer.processor.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -44,23 +45,32 @@ public class ProcessorApi {
 
                 @Override
                 public void init(ProcessorContext<String, Double> context) {
-                    // Save reference of the context
-                    // Retrieve the store and save a reference
-                    // Schedule a punctuation  HINT: use context.schedule and the method you want to call is forwardAll
+                    this.context = context;
+                    store = context.getStateStore(storeName);
+                    this.context.schedule(Duration.ofSeconds(30), PunctuationType.STREAM_TIME, this::forwardAll);
                 }
 
                 private void forwardAll(final long timestamp) {
-                   // Get a KeyValueIterator HINT there's a method on the KeyValueStore
-                   // Don't forget to close the iterator! HINT use try-with resources
-                   // Iterate over the records and create a Record instance and forward downstream HINT use a method on the ProcessorContext to forward
+                    try (KeyValueIterator<String, Double> iterator = store.all()) {
+                        while (iterator.hasNext()) {
+                            final KeyValue<String, Double> nextKV = iterator.next();
+                            final Record<String, Double> totalPriceRecord = new Record<>(nextKV.key, nextKV.value, timestamp);
+                            context.forward(totalPriceRecord);
+                            System.out.println("Punctuation forwarded record - key " + totalPriceRecord.key() +" value " + totalPriceRecord.value());
+                        }
+                    }
                 }
 
                 @Override
                 public void process(Record<String, ElectronicOrder> record) {
-                    // Get the current total from the store HINT: use the key on the record
-                    // Don't forget to check for null
-                    // Add the price from the value to the current total from store and put it in the store
-                    // HINT state stores are key-value stores
+                    final String key = record.key();
+                    Double currentTotal = store.get(key);
+                    if (currentTotal == null) {
+                        currentTotal = 0.0;
+                    }
+                    Double newTotal = record.value().getPrice() + currentTotal;
+                    store.put(key, newTotal);
+                    System.out.println("Processed incoming record - key " + key +" value " + record.value());
                 }
             };
         }
@@ -90,18 +100,23 @@ public class ProcessorApi {
         final Serde<Double> doubleSerde = Serdes.Double();
 
         final Topology topology = new Topology();
+        topology.addSource(
+                "source-node",
+                stringSerde.deserializer(),
+                electronicSerde.deserializer(),
+                inputTopic);
 
-        // Add a source node to the topology  HINT: topology.addSource
-        // Give it a name, add deserializers for the key and the value and provide the input topic name
-       
-        // Now add a processor to the topology HINT topology.addProcessor
-        // You'll give it a name, add a processor supplier HINT: a new instance and provide the store name
-        // You'll also provide a parent name HINT: it's the name you used for the source node
+        topology.addProcessor(
+                "aggregate-price",
+                new TotalPriceOrderProcessorSupplier(storeName),
+                "source-node");
 
-        // Finally, add a sink node HINT topology.addSink
-        // As before give it a name, the output topic name, serializers for the key and value HINT: string and double
-        // and the name of the parent node HINT it's the name you gave the processor
-
+        topology.addSink(
+                "sink-node",
+                outputTopic,
+                stringSerde.serializer(),
+                doubleSerde.serializer(),
+                "aggregate-price");
 
         final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps);
         TopicLoader.runProducer();

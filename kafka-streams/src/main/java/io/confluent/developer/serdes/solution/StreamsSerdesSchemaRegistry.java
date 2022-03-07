@@ -1,4 +1,4 @@
-package io.confluent.developer.serdes;
+package io.confluent.developer.serdes.solution;
 
 import io.confluent.developer.avro.ProcessedOrder;
 import io.confluent.developer.avro.ProductOrder;
@@ -30,11 +30,8 @@ public static void main(String[]args) throws IOException {
     final String inputTopic = streamsProps.getProperty("sr.input.topic");
     final String outputTopic = streamsProps.getProperty("sr.output.topic");
     final Map<String, String> configMap = propertiesToMap(streamsProps);
-
-    // Create the Avro Serde HINT there's a method in this class
-    final SpecificAvroSerde<ProductOrder> productOrderSerde = null;
-    // Create the Avro Serde HINT there's a method in this class
-    final SpecificAvroSerde<ProcessedOrder> processedOrderSerde = null;
+    final SpecificAvroSerde<ProductOrder> productOrderSerde = getSpecificAvroSerde(configMap);
+    final SpecificAvroSerde<ProcessedOrder> processedOrderSerde = getSpecificAvroSerde(configMap);
 
     final KStream<String, ProductOrder> orderStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), productOrderSerde));
     orderStream.mapValues(value -> ProcessedOrder.newBuilder()

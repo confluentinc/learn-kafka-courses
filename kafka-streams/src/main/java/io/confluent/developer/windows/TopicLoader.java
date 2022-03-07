@@ -23,7 +23,7 @@ public class TopicLoader {
         runProducer();
     }
 
-    static void runProducer() throws IOException {
+    public static void runProducer() throws IOException {
         Properties properties = StreamsUtils.loadProperties();
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);

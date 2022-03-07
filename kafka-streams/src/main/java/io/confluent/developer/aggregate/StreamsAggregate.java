@@ -35,12 +35,15 @@ public class StreamsAggregate {
                 builder.stream(inputTopic, Consumed.with(Serdes.String(), electronicSerde))
                         .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
 
-        electronicStream.groupByKey().aggregate(() -> 0.0,
-                                                (key, order, total) -> total + order.getPrice(),
-                                                 Materialized.with(Serdes.String(), Serdes.Double()))
-                                                .toStream()
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
-                .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
+              // Now take the electronicStream object, group by key and perform an aggregation
+              // Don't forget to convert the KTable returned by the aggregate call back to a KStream using the toStream method
+              electronicStream.groupByKey().aggregate(null, null);
+
+              // To view the results of the aggregation consider
+              // right after the toStream() method .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+
+              // Finally write the results to an output topic
+              //  .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
         TopicLoader.runProducer();

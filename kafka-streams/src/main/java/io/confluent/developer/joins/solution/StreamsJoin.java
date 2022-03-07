@@ -1,10 +1,11 @@
-package io.confluent.developer.joins;
+package io.confluent.developer.joins.solution;
 
 import io.confluent.developer.StreamsUtils;
 import io.confluent.developer.avro.ApplianceOrder;
 import io.confluent.developer.avro.CombinedOrder;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.developer.avro.User;
+import io.confluent.developer.joins.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
@@ -78,28 +79,20 @@ public class StreamsJoin {
         KTable<String, User> userTable =
                 builder.table(tableInput, Materialized.with(Serdes.String(), userSerde));
 
-        KStream<String, CombinedOrder> combinedStream = null;
-        // create a Join between the applianceStream and the electronicStream
-        // using the ValueJoiner created above, orderJoiner gets you the correct value type of CombinedOrder
-        // You want to join records within 30 minutes of each other HINT: JoinWindows and Duration.ofMinutes
-        // Add the correct Serdes for the join state stores remember both sides have same key type
-        // HINT: StreamJoined and Serdes.String  and Serdes for the applianceStream and electronicStream created above
+        KStream<String, CombinedOrder> combinedStream =
+                applianceStream.join(
+                        electronicStream,
+                        orderJoiner,
+                        JoinWindows.of(Duration.ofMinutes(30)),
+                        StreamJoined.with(Serdes.String(), applianceSerde, electronicSerde))
+                .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
 
-        // Optionally add this statement after the join to see the results on the console
-        // .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
-
-
-
-        // Now join the combinedStream with the userTable,
-        // but you'll always want a result even if no corresponding entry is found in the table
-        // Using the ValueJoiner created above, enrichmentJoiner, return a CombinedOrder instance enriched with user information
-        // You'll need to add a Joined instance with the correct Serdes for the join state store
-
-        // Add these two statements after the join call to print results to the console and write results out
-        // to a topic
-        
-        // .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
-        // .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
+        combinedStream.leftJoin(
+                userTable,
+                enrichmentJoiner,
+                Joined.with(Serdes.String(), combinedSerde, userSerde))
+                .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
+                .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
         KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
         TopicLoader.runProducer();
