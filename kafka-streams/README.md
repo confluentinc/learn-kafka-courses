@@ -2,7 +2,7 @@
 
 This is the code repo containing the full solutions to the exercises
 for the Kafka Streams course.  To get started you'll need to sign up
-for a CCloud account.  Follow the steps below to get everything ready to go.
+for a Confluent Cloud account.  Follow the steps below to get everything ready to go.
 
 It's recommended that you do these exercises while following along with the [Kafka Streams 101 course](https://developer.confluent.io/learn-kafka/kafka-streams/get-started/).
 The link for each module of the course related to the exercise description will be provided.
@@ -11,9 +11,9 @@ The link for each module of the course related to the exercise description will 
  
 1. Go to [Confluent Cloud](https://www.confluent.io/confluent-cloud/tryfree?utm_source=learnkafka). 
    If you don’t already have a Confluent Cloud account you can create one here. Use promotion code <TBC> for money off your cloud bill.
-2. Once logged into your cloud account click on the `Add cloud environment button` on the right-hand side of the screen.  Name the environment something like "kafka_streams_course_env".  You can also choose to use the `default` environment already present.  Using a new environment gives you the ability to keep resources separate on your Confluent account.
+2. Once logged into your cloud account click on the `Add cloud environment button` on the right-hand side of the screen.  Name the environment something like `kafka_streams_course_env`.  You can also choose to use the `default` environment already present.  Using a new environment gives you the ability to keep resources separate on your Confluent account.
    ![Create an environment or use the default one](images/confluent_environment.png)
-3. Click on the environment you just created or the `default` environment tile. Create a new cluster in Confluent by clicking on`Create cluster on my own`.  For the purposes of all the exercise modules you can use the `Basic` type. 
+3. Click on the environment you just created or the `default` environment tile. Create a new cluster by clicking on `Create cluster on my own`.  For the purposes of all the exercise modules you can use the `Basic` type. 
    Name the cluster `kafka_streams_course`. Then click on the `Launch Cluster` button on the bottom right.
    ![Create a cluster and name it kafka_streams_course](images/ksc_cluster_naming.png)
 4. You’ll also need to set up a Schema Registry. Click on the environment link in the upper left corner, either `default` or the name of the environment you created. 
@@ -30,7 +30,7 @@ The link for each module of the course related to the exercise description will 
    3. Click on `Create Schema Registry API key`.
    4. Copy your key and secret, name the file, then click `Download and continue`. (Your credentials will populate into the configurations boilerplate.)
    5. Make sure `Show API keys` is selected, then `Copy` the configurations in the window.
-   6. Create a file named `ccloud.properties` in the `src/main/resources directory` of the cloned repo. Then paste the configurations into a file named `ccloud.properties`. Note that this file is ignored and should never get checked into GitHub.
+   6. Create a file named `ccloud.properties` in the `src/main/resources` directory of the cloned repo. Then paste the configurations into a file named `ccloud.properties`. Note that this file is ignored and should never get checked into GitHub.
        
 Here's what you `ccloud.properties` file should look like except the values inside the `{{ }}` braces will have the 
 required credentials
