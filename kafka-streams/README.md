@@ -190,7 +190,8 @@ Outgoing record - key SUPER-WIDE-TV-2333 value 5333.98
 ```
 Two things to note about this example:
 1. The timestamps on the record are simulated to emit windowed results so what you'll see is approximated
-2. You need to let the application run for ~40 seconds to see the windowed aggregated output
+2. This application uses the default timestamp extractor [FailOnInvalidTimestamp](https://kafka.apache.org/10/documentation/streams/developer-guide/config-streams.html#timestamp-extractor) 
+3. You need to let the application run for ~40 seconds to see the windowed aggregated output
 
 #### Time Concepts
 
