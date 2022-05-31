@@ -1,0 +1,180 @@
+version: "3.5"
+services:
+  zk-1:
+    image: confluentinc/cp-zookeeper:6.1.0-1-ubi8
+    restart: always
+    container_name: zk-1
+    hostname: zk-1
+    ports:
+      - "12181:12181"
+    volumes:
+      - data-zk-log-1:/var/lib/zookeeper/log
+      - data-zk-data-1:/var/lib/zookeeper/data
+    networks:
+      - confluent
+    environment:
+      - ZOOKEEPER_SERVER_ID=1
+      - ZOOKEEPER_CLIENT_PORT=12181
+      - ZOOKEEPER_TICK_TIME=2000
+      - ZOOKEEPER_INIT_LIMIT=5
+      - ZOOKEEPER_SYNC_LIMIT=2
+      - ZOOKEEPER_SERVERS=zk-1:2888:3888;zk-2:2888:3888;zk-3:2888:3888
+  
+  zk-2:
+    image: confluentinc/cp-zookeeper:6.1.0-1-ubi8
+    restart: always
+    container_name: zk-2
+    hostname: zk-2
+    ports:
+      - "22181:22181"
+    volumes:
+      - data-zk-log-2:/var/lib/zookeeper/log
+      - data-zk-data-2:/var/lib/zookeeper/data
+    networks:
+      - confluent
+    environment:
+      - ZOOKEEPER_SERVER_ID=2
+      - ZOOKEEPER_CLIENT_PORT=22181
+      - ZOOKEEPER_TICK_TIME=2000
+      - ZOOKEEPER_INIT_LIMIT=5
+      - ZOOKEEPER_SYNC_LIMIT=2
+      - ZOOKEEPER_SERVERS=zk-1:2888:3888;zk-2:2888:3888;zk-3:2888:3888
+  
+  zk-3:
+    image: confluentinc/cp-zookeeper:6.1.0-1-ubi8
+    restart: always
+    container_name: zk-3
+    hostname: zk-3
+    ports:
+      - "32181:32181"
+    volumes:
+      - data-zk-log-3:/var/lib/zookeeper/log
+      - data-zk-data-3:/var/lib/zookeeper/data
+    networks:
+      - confluent
+    environment:
+      - ZOOKEEPER_SERVER_ID=3
+      - ZOOKEEPER_CLIENT_PORT=32181
+      - ZOOKEEPER_TICK_TIME=2000
+      - ZOOKEEPER_INIT_LIMIT=5
+      - ZOOKEEPER_SYNC_LIMIT=2
+      - ZOOKEEPER_SERVERS=zk-1:2888:3888;zk-2:2888:3888;zk-3:2888:3888
+
+  kafka-1:
+    image: confluentinc/cp-server:6.1.0-1-ubi8
+    restart: always
+    container_name: kafka-1
+    hostname: kafka-1
+    ports:
+      - "19092:19092"
+      - "19093:19093"      
+    networks:
+      - confluent
+    volumes:
+      - data-kafka-1:/var/lib/kafka/data
+      - /home/training/tls/kafka-1-creds:/etc/kafka/secrets
+    environment:
+      KAFKA_BROKER_ID: 101
+      KAFKA_ZOOKEEPER_CONNECT: zk-1:12181,zk-2:22181,zk-3:32181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      #KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      #CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19092,BROKER://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1-external:19092,BROKER://kafka-1:9092
+      #KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19092,SSL://0.0.0.0:19093,BROKER://0.0.0.0:9092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1-external:19092,SSL://kafka-1-external:19093,BROKER://kafka-1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka-1.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka-1_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka-1_sslkey_creds
+      #KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-1.truststore.jks
+      #KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-1_truststore_creds
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      #KAFKA_SSL_CLIENT_AUTH: "required"
+
+  kafka-2:
+    image: confluentinc/cp-server:6.1.0-1-ubi8
+    restart: always
+    container_name: kafka-2
+    hostname: kafka-2
+    ports:
+      - "29092:29092"
+      - "29093:29093"  
+    networks:
+      - confluent
+    volumes:
+      - data-kafka-2:/var/lib/kafka/data
+      - /home/training/tls/kafka-2-creds:/etc/kafka/secrets
+    environment:
+      KAFKA_BROKER_ID: 102
+      KAFKA_ZOOKEEPER_CONNECT: zk-1:12181,zk-2:22181,zk-3:32181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      #KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      #CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,BROKER://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2-external:29092,BROKER://kafka-2:9092
+      #KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,SSL://0.0.0.0:29093,BROKER://0.0.0.0:9092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2-external:29092,SSL://kafka-2-external:29093,BROKER://kafka-2:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka-2.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka-2_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka-2_sslkey_creds
+      #KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-2.truststore.jks
+      #KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-2_truststore_creds
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      #KAFKA_SSL_CLIENT_AUTH: "required"
+
+  kafka-3:
+    image: confluentinc/cp-server:6.1.0-1-ubi8
+    restart: always
+    container_name: kafka-3
+    hostname: kafka-3
+    ports:
+      - "39092:39092"
+      - "39093:39093"  
+    networks:
+      - confluent
+    volumes:
+      - data-kafka-3:/var/lib/kafka/data
+      - /home/training/tls/kafka-3-creds:/etc/kafka/secrets
+    environment:
+      KAFKA_BROKER_ID: 103
+      KAFKA_ZOOKEEPER_CONNECT: zk-1:12181,zk-2:22181,zk-3:32181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      #KAFKA_METRIC_REPORTERS: "io.confluent.metrics.reporter.ConfluentMetricsReporter"
+      #CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:39092,BROKER://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3-external:39092,BROKER://kafka-3:9092
+      #KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:39092,SSL://0.0.0.0:39093,BROKER://0.0.0.0:9092
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3-external:39092,SSL://kafka-3-external:39093,BROKER://kafka-3:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SSL:SSL,BROKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka-3.keystore.jks
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka-3_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka-3_sslkey_creds
+      #KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-3.truststore.jks
+      #KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-3_truststore_creds
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      #KAFKA_SSL_CLIENT_AUTH: "required"
+
+volumes:
+  data-zk-log-1:
+  data-zk-data-1:
+  data-zk-log-2:
+  data-zk-data-2:
+  data-zk-log-3:
+  data-zk-data-3:
+  data-kafka-1:
+  data-kafka-2:
+  data-kafka-3:
+
+networks:
+  confluent:
