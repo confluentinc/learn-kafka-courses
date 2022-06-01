@@ -28,3 +28,4 @@ subjectAltName = @alt_names
 [ alt_names ]
 DNS.1=kafka-1
 DNS.2=kafka-1-external
+DNS.3=localhost
