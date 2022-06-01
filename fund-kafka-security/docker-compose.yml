@@ -72,7 +72,7 @@ services:
       - confluent
     volumes:
       - data-kafka-1:/var/lib/kafka/data
-      - ./kafka-1-creds:/etc/kafka/secrets
+      - $PWD/kafka-1-creds:/etc/kafka/secrets
     environment:
       KAFKA_BROKER_ID: 101
       KAFKA_ZOOKEEPER_CONNECT: zk-1:12181,zk-2:22181,zk-3:32181
@@ -107,7 +107,7 @@ services:
       - confluent
     volumes:
       - data-kafka-2:/var/lib/kafka/data
-      - ./kafka-2-creds:/etc/kafka/secrets
+      - $PWD/kafka-2-creds:/etc/kafka/secrets
     environment:
       KAFKA_BROKER_ID: 102
       KAFKA_ZOOKEEPER_CONNECT: zk-1:12181,zk-2:22181,zk-3:32181
@@ -142,7 +142,7 @@ services:
       - confluent
     volumes:
       - data-kafka-3:/var/lib/kafka/data
-      - ./kafka-3-creds:/etc/kafka/secrets
+      - $PWD/kafka-3-creds:/etc/kafka/secrets
     environment:
       KAFKA_BROKER_ID: 103
       KAFKA_ZOOKEEPER_CONNECT: zk-1:12181,zk-2:22181,zk-3:32181

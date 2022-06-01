@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/tls
+cd ~/learn-kafka-courses/fund-kafka-security
 
 for i in kafka-2 kafka-3
 do
