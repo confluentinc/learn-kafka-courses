@@ -125,11 +125,13 @@ It's recommended to watch the [KTable lecture](https://developer.confluent.io/le
 
 This exercise is a gentle introduction to the Kafka Streams `KTable` abstraction.  This example uses the same topology as the `basic` example, but your expected output
 is different due to fact that a `KTable` is an update-stream, and records with the same key are considered updates to previous records.  The default behavior 
-of a `KTable` then is to emit only the latest update per key. The sample data for this exercise has the same key, 
-so in this case your output will consist of one record:
+of a `KTable` then is to emit only the latest update per key. 
+
+You run the `KTable`  example with this command ` ./gradlew runStreams -Pargs=ktable` and your output on the console should resemble this: 
 ```text
 Outgoing record - key order-key value 8400
 ```
+The sample data for this exercise has the same key, so your output for this exercise contains only one record.
 
 NOTE: Since the default behavior for materialized `KTable`s is to emit changes on commit or when the cache is full, you'll need 
 to let this application run for roughly 40 seconds to see a result.
@@ -141,7 +143,8 @@ It's recommended to watch the [Joins lecture](https://developer.confluent.io/lea
 The Joins exercise creates a join between two `KStream` objects resulting in a new `KStream` which is 
 further joined against a `KTable`.  You'll see the input records for the two `KStream`s , the results of the 
 Stream-Stream join, and the final Stream-Table join results.  
-The total output for the exercise should like this:
+
+You run the joins example with this command ` ./gradlew runStreams -Pargs=joins` and the output for the exercise should like this:
 ```text
 Appliance stream incoming record key 10261998 value {"order_id": "remodel-1", "appliance_id": "dishwasher-1333", "user_id": "10261998", "time": 1622148573134}
 Electronic stream incoming record 10261999 value {"order_id": "remodel-2", "electronic_id": "laptop-5333", "user_id": "10261999", "price": 0.0, "time": 1622148573146}
@@ -158,8 +161,9 @@ Stream-Table Join record key 10261999 value {"electronic_order_id": "remodel-2",
 
 It's recommended to watch the [Stateful operations](https://developer.confluent.io/learn-kafka/kafka-streams/stateful-operations/) and the [Hands On: Aggregations](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-aggregations/) videos first.
 
-This exercise demonstrates an aggregation of a simulated stream of electronic purchase. You'll see the incoming records
-on the console along with the aggregation results:
+This exercise demonstrates an aggregation of a simulated stream of electronic purchase. 
+To run the aggregation example use this command ` ./gradlew runStreams -Pargs=aggregate` 
+You'll see the incoming records on the console along with the aggregation results:
 
 ```text
 Incoming record - key HDTV-2333 value {"order_id": "instore-1", "electronic_id": "HDTV-2333", "user_id": "10261998", "price": 2000.0, "time": 1622149038018}
@@ -174,8 +178,10 @@ NOTE that you'll need to let the streams application run for ~40 seconds to see 
 
 It's recommended to watch the [Windowing](https://developer.confluent.io/learn-kafka/kafka-streams/windowing/) and the [Hands On: Windowing](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-windowing/) videos before attempting the exercises.
 
-This exercise uses top aggregation exercise, but adds windowing to it.  You'll use slightly different input
-records, and your output should look something like this:
+This exercise uses builds on top of the aggregation exercise, but adds windowing to it.  
+ 
+To run the windowing exercise execute this command ` ./gradlew runStreams -Pargs=windows`
+You'll use slightly different input records, and your output should look something like this:
 ```text
 Incoming record - key HDTV-2333 value {"order_id": "instore-1", "electronic_id": "HDTV-2333", "user_id": "10261998", "price": 2000.0, "time": 1622152480629}
 Incoming record - key HDTV-2333 value {"order_id": "instore-1", "electronic_id": "HDTV-2333", "user_id": "1033737373", "price": 1999.23, "time": 1622153380629}
@@ -188,9 +194,10 @@ Outgoing record - key HDTV-2333 value 2000.0
 Outgoing record - key HDTV-2333 value 9167.189999999999
 Outgoing record - key SUPER-WIDE-TV-2333 value 5333.98
 ```
-Two things to note about this example:
+Three things to note about this example:
 1. The timestamps on the record are simulated to emit windowed results so what you'll see is approximated
-2. You need to let the application run for ~40 seconds to see the windowed aggregated output
+2. This application uses the default timestamp extractor [FailOnInvalidTimestamp](https://kafka.apache.org/10/documentation/streams/developer-guide/config-streams.html#timestamp-extractor) 
+3. You need to let the application run for ~40 seconds to see the windowed aggregated output
 
 #### Time Concepts
 
@@ -198,7 +205,11 @@ It's recommended to watch the [Time Concepts](https://developer.confluent.io/lea
 
 The time concepts exercise uses an aggregation with windowing.  However, this example uses a custom 
 `TimestampExtractor` to use timestamps embedded in the record itself (event time) to drive the behavior of Kafka Steams
-application.  Your output will include statements from the `TimestampExtractor` when it executes and it should look
+application.  
+
+To run this example execute ` ./gradlew runStreams -Pargs=time`.
+
+Your output will include statements from the `TimestampExtractor` and it should look
 something like this:
 ```text
 Extracting time of 1622155705696 from {"order_id": "instore-1", "electronic_id": "HDTV-2333", "user_id": "10261998", "price": 2000.0, "time": 1622155705696}
@@ -224,7 +235,9 @@ Two things to note about this example:
 It's recommended to watch the [Processor API](https://developer.confluent.io/learn-kafka/kafka-streams/processor-api/) and [Hands On: Processor API](https://developer.confluent.io/learn-kafka/kafka-streams/hands-on-processor-api/) videos before moving on to the exercises.
 
 This exercise covers working with the Processor API.  The application creates an aggregation but uses a punctuation every 30 seconds
-(stream-time) to emit records.  The results should look like this:
+(stream-time) to emit records.
+
+You run this example with the command: ` ./gradlew runStreams -Pargs=processor` and the results should look like this:
 ```text
 Processed incoming record - key HDTV-2333 value {"order_id": "instore-1", "electronic_id": "HDTV-2333", "user_id": "10261998", "price": 2000.0, "time": 1622156159867}
 Punctuation forwarded record - key HDTV-2333 value 2000.0
@@ -245,7 +258,10 @@ It's recommended to watch the [Error Handling](https://developer.confluent.io/le
 The error handling exercise injects a simulated transient error. The Kafka Streams `StreamsUncaughtExceptionHandler` 
 examines the exception and returns a `StreamThreadExceptionResponse.REPLACE_THREAD` response that allows the application
 to resume processing after the error. 
-When running this application you'll see a stacktrace then in a few seconds, normal output:
+
+Use this command, ` ./gradlew runStreams -Pargs=error`, to run the errors example.
+
+When the application runs you'll see a stacktrace then in a few seconds the application will recover and continue running:
 ```text
 Incoming record - key order-key value orderNumber-1001
 Exception in thread "streams-error-handling-f589722e-89f3-4304-a38e-77a9b9ad5166-StreamThread-1" org.apache.kafka.streams.errors.StreamsException: Exception caught in process. taskId=0_4, processor=KSTREAM-SOURCE-0000000000, topic=streams-error-input, partition=4, offset=0, stacktrace=java.lang.IllegalStateException: Retryable transient error
