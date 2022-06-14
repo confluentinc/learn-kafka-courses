@@ -1,0 +1,20 @@
+{
+    "connector.class": "MySqlSink",
+    "name": "MySqlSinkConnector_1",
+    "topics": "transactions",
+    "input.data.format": "AVRO",
+    "input.key.format": "STRING",
+    "kafka.auth.mode": "KAFKA_API_KEY",
+    "kafka.api.key": "<key>",
+    "kafka.api.secret": "<secret>",
+    "connection.host": "<mysql-host-endpoint>",
+    "connection.port": "3306",
+    "connection.user": "kc101user",
+    "connection.password": "kc101pw",
+    "db.name": "demo",
+    "ssl.mode": "prefer",
+    "pk.mode": "none",
+    "auto.create": "true",
+    "auto.evolve": "true",
+    "tasks.max": "1"
+}  

@@ -1,0 +1,14 @@
+{
+    "name": "DatagenSourceConnector_0",
+    "config": {
+      "connector.class": "DatagenSource",
+      "name": "DatagenSourceConnector_0",
+      "kafka.auth.mode": "KAFKA_API_KEY",
+      "kafka.api.key": "<key>",
+      "kafka.api.secret": "<secret>",
+      "kafka.topic": "transactions",
+      "output.data.format": "AVRO",
+      "quickstart": "TRANSACTIONS",
+      "tasks.max": "1"
+    }
+  }
