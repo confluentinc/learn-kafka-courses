@@ -105,6 +105,11 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
       CONNECT_LOG4J_LOGGERS: 'org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR'
 
+      # Confluent Cloud config
+      CONNECT_REQUEST_TIMEOUT_MS: "20000"
+      CONNECT_RETRY_BACKOFF_MS: "500"
+      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+
       # Connect worker
       CONNECT_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
