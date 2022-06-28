@@ -2,13 +2,19 @@
 version: '2'
 services:
 
-  neo4j:
-    image: neo4j:4.4.4
-    container_name: neo4j
+  mysql:
+    # *-----------------------------*
+    # To connect to the DB:
+    #   docker exec -it mysql bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD demo'
+    # *-----------------------------*
+    image: mysql:8.0
+    container_name: mysql
     ports:
-    - "7474:7474"
-    - "7687:7687"
+      - 3306:3306
     environment:
-      NEO4J_AUTH: neo4j/connect
-      NEO4J_dbms_memory_heap_max__size: 8G
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+     - MYSQL_ROOT_PASSWORD=kc101
+     - MYSQL_USER=mysqluser
+     - MYSQL_PASSWORD=mysqlpw
+    volumes:
+     - ${PWD}/data/mysql:/docker-entrypoint-initdb.d
+     - ${PWD}/data:/data
