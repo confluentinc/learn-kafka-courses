@@ -4,7 +4,7 @@
   "name":"Purchase",
   "fields": [
     {"name": "item", "type":"string"},
-    {"name": "amount", "type": "double", "default": "0.0" },
+    {"name": "amount", "type": "double" },
     {"name": "customer_id", "type": "string"}
   ]
 }
