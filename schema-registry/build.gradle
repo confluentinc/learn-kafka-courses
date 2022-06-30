@@ -95,15 +95,10 @@ schemaRegistry {
     } else {
         println("Expected to find the [schema.registry.url] and [basic.auth.user.info]")
     }
-
-
-    // Possible types are ["JSON", "PROTOBUF", "AVRO"]
+    
     register {
-        subject('page-view', 'src/main/avro/page_view.avsc', 'AVRO')
-        subject('purchase', 'src/main/avro/purchase.avsc', 'AVRO')
-        subject('avro-events-value', 'src/main/avro/all_events.avsc', 'AVRO')
-                .addReference("io.confluent.developer.avro.PageView", "page-view", 1)
-                .addReference("io.confluent.developer.avro.Purchase", "purchase", 1)
+        subject('avro-purchase-value', 'src/main/avro/purchase.avsc', 'AVRO')
+        subject('proto-purchase-value', 'src/main/proto/purchase.proto', 'PROTOBUF')
     }
 
 }
