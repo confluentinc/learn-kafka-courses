@@ -1,4 +1,4 @@
-# This is a placeholder for storing the properties need to connect to Confluent Cloud
+# This is a placeholder for storing the properties needed to connect to Confluent Cloud
 # Create a new properties file by copying this file to one named confluent.properties
 # The confluent.properties file is ignored by Git - never checkin your credentials!
 
