@@ -41,6 +41,9 @@ repositories {
 dependencies {
     implementation 'com.google.protobuf:protobuf-java:3.21.1'
     implementation 'org.apache.avro:avro:1.11.0'
+    implementation "io.confluent:kafka-avro-serializer:7.2.1"
+    implementation "io.confluent:kafka-protobuf-serializer:7.2.1"
+    implementation "io.confluent:kafka-protobuf-provider:7.2.1"
 
     implementation 'org.apache.logging.log4j:log4j-api:2.17.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
@@ -61,9 +64,7 @@ dependencies {
         exclude group: 'org.apache.kafka', module: 'kafka-streams'
     }
 
-    implementation "io.confluent:kafka-avro-serializer:7.2.1"
-    implementation "io.confluent:kafka-protobuf-serializer:7.2.1"
-    implementation "io.confluent:kafka-protobuf-provider:7.2.1"
+
 }
 
 protobuf {
@@ -81,7 +82,7 @@ schemaRegistry {
     def srUrl = props.getProperty("schema.registry.url")
     def fullAuth =  props.getProperty("basic.auth.user.info")
     if (srUrl != null && fullAuth != null) {
-        //println "Using Schema Registry endpoint:${srUrl}, username:${auth[0]},password:${auth[1]}"
+        // println "Using Schema Registry endpoint:${srUrl}, username:${auth[0]},password:${auth[1]}"
         def auth = fullAuth.split(":")
         url = srUrl
 

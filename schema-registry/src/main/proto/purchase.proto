@@ -3,4 +3,4 @@ syntax = "proto3";
 package io.confluent.developer.proto;
 option java_outer_classname = "PurchaseProto";
 
-//Complete this file by adding the message implementation as directed in the course
+// Complete this file by adding the message implementation as directed in the course
