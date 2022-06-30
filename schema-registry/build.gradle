@@ -41,9 +41,9 @@ repositories {
 dependencies {
     implementation 'com.google.protobuf:protobuf-java:3.21.1'
     implementation 'org.apache.avro:avro:1.11.0'
-    implementation "io.confluent:kafka-avro-serializer:7.2.1"
-    implementation "io.confluent:kafka-protobuf-serializer:7.2.1"
-    implementation "io.confluent:kafka-protobuf-provider:7.2.1"
+    implementation "io.confluent:kafka-avro-serializer:7.1.1"
+    implementation "io.confluent:kafka-protobuf-serializer:7.1.1"
+    implementation "io.confluent:kafka-protobuf-provider:7.1.1"
 
     implementation 'org.apache.logging.log4j:log4j-api:2.17.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
@@ -54,17 +54,6 @@ dependencies {
     }
     implementation('org.apache.kafka:kafka-clients:3.2.0')
     
-    implementation('io.confluent:kafka-streams-avro-serde:7.2.1') {
-        exclude group: 'org.apache.kafka', module: 'kafka-clients'
-        exclude group: 'org.apache.kafka', module: 'kafka-streams'
-    }
-
-    implementation('io.confluent:kafka-streams-protobuf-serde:7.2.1') {
-        exclude group: 'org.apache.kafka', module: 'kafka-clients'
-        exclude group: 'org.apache.kafka', module: 'kafka-streams'
-    }
-
-
 }
 
 protobuf {
