@@ -1,0 +1,15 @@
+# This is a placeholder for storing the properties needed to connect to Confluent Cloud
+# Create a new properties file by copying this file to one named confluent.properties
+# The confluent.properties file is ignored by Git - never checkin your credentials!
+
+# You can fill out these properties individually or copy/paste the config file generated
+# on Confluent Cloud when setting up the cluster from the client setup section
+
+
+sasl.mechanism=PLAIN
+security.protocol=SASL_SSL
+bootstrap.servers=
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username='XXXX' password='XXXXXXX';
+basic.auth.credentials.source=USER_INFO
+schema.registry.url=
+basic.auth.user.info=XXXXX:XXXX

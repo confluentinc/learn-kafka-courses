@@ -1,0 +1,10 @@
+{
+  "type":"record",
+  "namespace": "io.confluent.developer.avro",
+  "name":"Purchase",
+  "fields": [
+    {"name": "item", "type":"string"},
+    {"name": "amount", "type": "double", "default": "0.0" },
+    {"name": "customer_id", "type": "string"}
+  ]
+}

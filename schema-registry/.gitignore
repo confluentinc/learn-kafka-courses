@@ -1,0 +1,14 @@
+# Default ignored files
+.idea/
+.gradle/
+build/
+
+streams.properties
+confluent.properties
+*.log
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
