@@ -90,6 +90,15 @@ schemaRegistry {
         subject('proto-purchase-value', 'src/main/proto/purchase.proto', 'PROTOBUF')
     }
 
+    download {
+        subject('avro-purchase-value', 'src/main/avro', 'purchase')
+        subject('proto-purchase-value', 'src/main/proto', 'purchase')
+    }
+
+    compatibility {
+        subject('avro-purchase-value', 'src/main/avro/purchase.avsc', 'AVRO')
+        subject('avro-purchase-value', 'src/main/avro/purchase.avsc', 'AVRO')
+    }
 }
 
 
