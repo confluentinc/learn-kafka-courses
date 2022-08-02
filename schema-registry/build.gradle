@@ -95,7 +95,7 @@ schemaRegistry {
 
     compatibility {
         subject('avro-purchase-value', 'src/main/avro/purchase.avsc', 'AVRO')
-        subject('avro-purchase-value', 'src/main/avro/purchase.avsc', 'AVRO')
+        subject('proto-purchase-value', 'src/main/proto/purchase.proto', 'PROTOBUF')
     }
 }
 
