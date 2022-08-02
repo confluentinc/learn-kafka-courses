@@ -2,10 +2,12 @@
 .idea/
 .gradle/
 build/
+out/
 
 streams.properties
 confluent.properties
 *.log
+notes.txt
 
 # Ignore Gradle project-specific cache directory
 .gradle
