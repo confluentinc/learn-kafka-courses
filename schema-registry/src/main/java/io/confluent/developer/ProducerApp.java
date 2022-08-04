@@ -32,15 +32,15 @@ public class ProducerApp {
         Map<String, Object> producerConfigs = new HashMap<>();
         properties.forEach((key, value) -> producerConfigs.put((String) key, value));
 
-        producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class );
-        producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaProtobufSerializer.class);
+        producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, <Replace this with key serializer class>);
+        producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, <Replace this with value serializer class>);
         // Setting auto-registration to false since we've already registered the schema manually
         producerConfigs.put(AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
 
         // Obvious duplication but this is done to emphasize what's needed to use SchemaRegistry
         producerConfigs.put("basic.auth.credentials.source", "USER_INFO");
-        producerConfigs.put("schema.registry.url", "Replace this with schema.registry.url value from confluent.properties");
-        producerConfigs.put("basic.auth.user.info", "Replace this with basic.auth.user.info value from confluent.properties");
+        producerConfigs.put("schema.registry.url", "<Replace this with schema.registry.url value from confluent.properties>");
+        producerConfigs.put("basic.auth.user.info", "<Replace this with basic.auth.user.info value from confluent.properties>");
 
         System.out.printf("Producer now configured for using SchemaRegistry %n");
         try (final Producer<String, Purchase> producer = new KafkaProducer<>(producerConfigs)) {
