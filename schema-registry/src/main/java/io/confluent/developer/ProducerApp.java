@@ -37,10 +37,10 @@ public class ProducerApp {
         // Setting auto-registration to false since we've already registered the schema manually
         producerConfigs.put(AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
 
-
+        // Obvious duplication but this is done to emphasize what's needed to use SchemaRegistry
         producerConfigs.put("basic.auth.credentials.source", "USER_INFO");
-        producerConfigs.put("schema.registry.url", "https://psrc-4xgzx.us-east-2.aws.confluent.cloud");
-        producerConfigs.put("basic.auth.user.info", "ZS7IZZEF7P3NEVNP:Nb6HGV77cEpZ8dhZOgoYC4zXzcCb4PBLWmysx4gnVzzqbgsMA01S6eADcXGtrhRX");
+        producerConfigs.put("schema.registry.url", "Replace this with schema.registry.url value from confluent.properties");
+        producerConfigs.put("basic.auth.user.info", "Replace this with basic.auth.user.info value from confluent.properties");
 
         System.out.printf("Producer now configured for using SchemaRegistry %n");
         try (final Producer<String, Purchase> producer = new KafkaProducer<>(producerConfigs)) {

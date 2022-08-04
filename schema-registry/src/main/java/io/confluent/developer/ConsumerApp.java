@@ -32,8 +32,8 @@ public class ConsumerApp {
          
          // Obvious duplication but this is done to emphasize what's needed to use SchemaRegistry
          consumerConfigs.put("basic.auth.credentials.source", "USER_INFO");
-         consumerConfigs.put("schema.registry.url", "https://psrc-4xgzx.us-east-2.aws.confluent.cloud");
-         consumerConfigs.put("basic.auth.user.info", "ZS7IZZEF7P3NEVNP:Nb6HGV77cEpZ8dhZOgoYC4zXzcCb4PBLWmysx4gnVzzqbgsMA01S6eADcXGtrhRX");
+         consumerConfigs.put("schema.registry.url", "Replace this with schema.registry.url value from confluent.properties");
+         consumerConfigs.put("basic.auth.user.info", "Replace this with basic.auth.user.info value from confluent.properties");
 
          try(Consumer<String, Purchase> consumer = new KafkaConsumer<>(consumerConfigs)){
              consumer.subscribe(Collections.singletonList("proto-purchase"));
