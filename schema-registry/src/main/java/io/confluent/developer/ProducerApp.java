@@ -34,7 +34,7 @@ public class ProducerApp {
 
         producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, <Replace this with key serializer class>);
         producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, <Replace this with value serializer class>);
-        // Setting auto-registration to false since this is a best practice
+        // Setting schema auto-registration to false since this we already registered the schema manually following best practice
         producerConfigs.put(AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
 
         // Duplication of configs loaded from confluent.properties to emphasize what's needed to use SchemaRegistry
