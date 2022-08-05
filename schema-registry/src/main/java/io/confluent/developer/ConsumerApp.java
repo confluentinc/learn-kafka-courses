@@ -30,9 +30,9 @@ public class ConsumerApp {
          consumerConfigs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, <Replace this with value deserializer class>);
          consumerConfigs.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, Purchase.class );
          
-         // Obvious duplication but this is done to emphasize what's needed to use SchemaRegistry
-         consumerConfigs.put("basic.auth.credentials.source", "USER_INFO");
+        // Duplication of configs loaded from confluent.properties to emphasize what's needed to use SchemaRegistry
          consumerConfigs.put("schema.registry.url", "<Replace this with schema.registry.url value from confluent.properties>");
+         consumerConfigs.put("basic.auth.credentials.source", "USER_INFO");
          consumerConfigs.put("basic.auth.user.info", "<Replace this with basic.auth.user.info value from confluent.properties>");
 
          try(Consumer<String, Purchase> consumer = new KafkaConsumer<>(consumerConfigs)){
