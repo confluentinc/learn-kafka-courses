@@ -32,8 +32,8 @@ public class ProducerApp {
         Map<String, Object> producerConfigs = new HashMap<>();
         properties.forEach((key, value) -> producerConfigs.put((String) key, value));
 
-        producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, <Replace this with key serializer class>);
-        producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, <Replace this with value serializer class>);
+        producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "<Replace this with key serializer class>");
+        producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "<Replace this with value serializer class>");
         // Setting schema auto-registration to false since we already registered the schema manually following best practice
         producerConfigs.put(AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
 
@@ -65,7 +65,7 @@ public class ProducerApp {
     Purchase getPurchaseObject(Builder purchaseBuilder) {
         purchaseBuilder.clear();
         purchaseBuilder.setCustomerId("vandelay")
-                .setAmount(random.nextDouble() * random.nextInt(100))
+                .setTotalCost(random.nextDouble() * random.nextInt(100))
                 .setItem(items.get(random.nextInt(3)));
         return purchaseBuilder.build();
     }
