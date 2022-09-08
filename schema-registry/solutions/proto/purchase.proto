@@ -5,6 +5,6 @@ option java_outer_classname = "PurchaseProto";
 
 message Purchase {
   string item = 1;
-  double amount = 2;
+  double total_cost = 2;
   string customer_id = 3;
 }
