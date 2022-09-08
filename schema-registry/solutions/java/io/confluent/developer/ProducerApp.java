@@ -34,15 +34,15 @@ public class ProducerApp {
 
         producerConfigs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerConfigs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaProtobufSerializer.class);
-        // Setting auto-registration to false since we've already registered the schema manually
+        // Setting schema auto-registration to false since we already registered the schema manually following best practice
         producerConfigs.put(AbstractKafkaSchemaSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
 
-        // Obvious duplication but this is done to emphasize what's needed to use SchemaRegistry
+        // Duplication of configs loaded from confluent.properties to emphasize what's needed to use SchemaRegistry
+        producerConfigs.put("schema.registry.url", "<Replace this with schema.registry.url value from confluent.properties>");
         producerConfigs.put("basic.auth.credentials.source", "USER_INFO");
-        producerConfigs.put("schema.registry.url", "Replace this with schema.registry.url value from confluent.properties");
-        producerConfigs.put("basic.auth.user.info", "Replace this with basic.auth.user.info value from confluent.properties");
+        producerConfigs.put("basic.auth.user.info", "<Replace this with basic.auth.user.info value from confluent.properties>");
 
-        LOG.info("Producer now configured for using SchemaRegistry");
+        System.out.printf("Producer now configured for using SchemaRegistry %n");
         try (final Producer<String, Purchase> producer = new KafkaProducer<>(producerConfigs)) {
             String topic = "proto-purchase";
             List<Purchase> purchaseEvents = new ArrayList<>();
@@ -54,9 +54,9 @@ public class ProducerApp {
 
             purchaseEvents.forEach(event -> producer.send(new ProducerRecord<>(topic, event.getCustomerId(), event), ((metadata, exception) -> {
                 if (exception != null) {
-                    LOG.error("Producing {} resulted in error", event, exception);
+                    System.err.printf("Producing %s resulted in error %s %n", event, exception);
                 } else {
-                    LOG.info("Produced record at offset {} with timestamp {}", metadata.offset(), metadata.timestamp());
+                    System.out.printf("Produced record at offset %s with timestamp %d %n", metadata.offset(), metadata.timestamp());
                 }
             })));
         }
@@ -65,7 +65,7 @@ public class ProducerApp {
     Purchase getPurchaseObject(Builder purchaseBuilder) {
         purchaseBuilder.clear();
         purchaseBuilder.setCustomerId("vandelay")
-                .setAmount(random.nextDouble() * random.nextInt(100))
+                .setTotalCost(random.nextDouble() * random.nextInt(100))
                 .setItem(items.get(random.nextInt(3)));
         return purchaseBuilder.build();
     }

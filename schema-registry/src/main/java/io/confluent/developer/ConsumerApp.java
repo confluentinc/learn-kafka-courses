@@ -43,7 +43,7 @@ public class ConsumerApp {
                      Purchase purchase = consumerRecord.value();
                      System.out.print("Purchase details { ");
                      System.out.printf("Customer: %s, ", purchase.getCustomerId());
-                     System.out.printf("Amount: %f, ", purchase.getAmount());
+                     System.out.printf("Total Cost: %f, ", purchase.getTotalCost());
                      System.out.printf("Item: %s } %n", purchase.getItem());
                  });
              }

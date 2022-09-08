@@ -2,13 +2,12 @@ package io.confluent.developer;
 
 import io.confluent.developer.proto.PurchaseProto.Purchase;
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer;
+import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializerConfig;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,8 +19,6 @@ import java.util.Properties;
 
 public class ConsumerApp {
 
-     private static final Logger LOG = LoggerFactory.getLogger(ConsumerApp.class);
-
      public void consumePurchaseEvents() {
          Properties properties = loadProperties();
          Map<String, Object> consumerConfigs = new HashMap<>();
@@ -31,12 +28,12 @@ public class ConsumerApp {
 
          consumerConfigs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
          consumerConfigs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaProtobufDeserializer.class);
-         consumerConfigs.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, Purchase.class);
+         consumerConfigs.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, Purchase.class );
          
-         // Obvious duplication but this is done to emphasize what's needed to use SchemaRegistry
+        // Duplication of configs loaded from confluent.properties to emphasize what's needed to use SchemaRegistry
+         consumerConfigs.put("schema.registry.url", "<Replace this with schema.registry.url value from confluent.properties>");
          consumerConfigs.put("basic.auth.credentials.source", "USER_INFO");
-         consumerConfigs.put("schema.registry.url", "Replace this with schema.registry.url value from confluent.properties");
-         consumerConfigs.put("basic.auth.user.info", "Replace this with basic.auth.user.info value from confluent.properties");
+         consumerConfigs.put("basic.auth.user.info", "<Replace this with basic.auth.user.info value from confluent.properties>");
 
          try(Consumer<String, Purchase> consumer = new KafkaConsumer<>(consumerConfigs)){
              consumer.subscribe(Collections.singletonList("proto-purchase"));
@@ -44,11 +41,10 @@ public class ConsumerApp {
                  ConsumerRecords<String, Purchase> consumerRecords = consumer.poll(Duration.ofSeconds(2));
                  consumerRecords.forEach(consumerRecord -> {
                      Purchase purchase = consumerRecord.value();
-                     System.out.printf("Purchase details: %n");
-                     System.out.printf("Customer: %s %n", purchase.getCustomerId());
-                     System.out.printf("Amount: %f %n", purchase.getAmount());
-                     System.out.printf("Item: %s %n", purchase.getItem());
-                     System.out.printf("Employee: %s %n", purchase.getEmployeeId());
+                     System.out.print("Purchase details { ");
+                     System.out.printf("Customer: %s, ", purchase.getCustomerId());
+                     System.out.printf("Total Cost: %f, ", purchase.getTotalCost());
+                     System.out.printf("Item: %s } %n", purchase.getItem());
                  });
              }
          }

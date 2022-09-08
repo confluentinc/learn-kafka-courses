@@ -89,7 +89,10 @@ schemaRegistry {
     }
 
     download {
-        subject('avro-purchase-value', 'src/main/avro', 'purchase')
+        // commented out to prevent its download which results in the schema 
+        // definition json being flattened to a single line which doesn't
+        // match the exercise illustration
+        // subject('avro-purchase-value', 'src/main/avro', 'purchase')
         subject('proto-purchase-value', 'src/main/proto', 'purchase')
     }
 
