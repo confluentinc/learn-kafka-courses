@@ -94,9 +94,10 @@ public class StreamsJoin {
                 .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
-        KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        TopicLoader.runProducer();
-        kafkaStreams.start();
+        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            TopicLoader.runProducer();
+            kafkaStreams.start();
+        }
 
     }
 }

@@ -33,8 +33,9 @@ public class StreamsSerdes {
                 // Add the correct key and value Serdes to write out to a topic
                 .to(outputTopic, Produced.with(null, null));
 
-        KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        kafkaStreams.start();
+        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            kafkaStreams.start();
+        }
     }
 
 
