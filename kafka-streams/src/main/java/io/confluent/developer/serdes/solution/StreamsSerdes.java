@@ -31,9 +31,8 @@ public class StreamsSerdes {
                 .filter((key, value) -> Long.parseLong(value) > 1000)
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
-        KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        kafkaStreams.start();
+        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            kafkaStreams.start();
+        }
     }
-
-
 }

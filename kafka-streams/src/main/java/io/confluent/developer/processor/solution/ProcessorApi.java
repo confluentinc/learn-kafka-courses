@@ -118,9 +118,9 @@ public class ProcessorApi {
                 doubleSerde.serializer(),
                 "aggregate-price");
 
-        final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps);
-        TopicLoader.runProducer();
-        kafkaStreams.start();
+        try(final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+            TopicLoader.runProducer();
+            kafkaStreams.start();
+        }
     }
-
 }

@@ -103,9 +103,9 @@ public class ProcessorApi {
         // and the name of the parent node HINT it's the name you gave the processor
 
 
-        final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps);
-        TopicLoader.runProducer();
-        kafkaStreams.start();
+        try(final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+            TopicLoader.runProducer();
+            kafkaStreams.start();
+        }
     }
-
 }

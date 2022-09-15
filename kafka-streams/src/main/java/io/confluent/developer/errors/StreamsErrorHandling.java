@@ -111,10 +111,11 @@ public class StreamsErrorHandling {
                 .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
-        KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        // Set an UncaughtExceptionHandler on Kafka Streams HINT: It should be type of StreamsUncaughtExceptionHandler
-        // kafkaStreams.set...
-        TopicLoader.runProducer();
-        kafkaStreams.start();
+        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            // Set an UncaughtExceptionHandler on Kafka Streams HINT: It should be type of StreamsUncaughtExceptionHandler
+            // kafkaStreams.set...
+            TopicLoader.runProducer();
+            kafkaStreams.start();
+        }
     }
 }

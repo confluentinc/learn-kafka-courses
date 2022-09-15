@@ -44,8 +44,9 @@ public class KTableExample {
                 //.to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
 
-        KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-        TopicLoader.runProducer();
-        kafkaStreams.start();
+        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            TopicLoader.runProducer();
+            kafkaStreams.start();
+        }
     }
 }
