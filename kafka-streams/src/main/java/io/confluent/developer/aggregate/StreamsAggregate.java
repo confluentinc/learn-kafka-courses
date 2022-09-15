@@ -50,6 +50,4 @@ public class StreamsAggregate {
             kafkaStreams.start();
         }
     }
-
-
 }

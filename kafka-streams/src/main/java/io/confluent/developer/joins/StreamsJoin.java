@@ -105,6 +105,5 @@ public class StreamsJoin {
             TopicLoader.runProducer();
             kafkaStreams.start();
         }
-
     }
 }

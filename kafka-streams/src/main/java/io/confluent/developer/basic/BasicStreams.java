@@ -38,9 +38,10 @@ public class BasicStreams {
                    .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value));
                    //Write the results to an output topic defined above as outputTopic HINT: use "to" and Produced and Serdes.String()
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
-            TopicLoader.runProducer();
-            kafkaStreams.start();
-        }
+         try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+             TopicLoader.runProducer();
+             kafkaStreams.start();
+         }
     }
 }
+

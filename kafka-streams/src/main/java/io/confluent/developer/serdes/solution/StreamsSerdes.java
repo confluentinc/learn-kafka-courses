@@ -35,6 +35,4 @@ public class StreamsSerdes {
             kafkaStreams.start();
         }
     }
-
-
 }

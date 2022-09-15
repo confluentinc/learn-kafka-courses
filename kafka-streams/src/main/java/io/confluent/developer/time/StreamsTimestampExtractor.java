@@ -65,6 +65,5 @@ public class StreamsTimestampExtractor {
             TopicLoader.runProducer();
             kafkaStreams.start();
         }
-
     }
 }
