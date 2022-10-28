@@ -26,8 +26,8 @@ public class ConsumerApp {
          consumerConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, "schema-registry-course-consumer");
          consumerConfigs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-         consumerConfigs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, <Replace this with key deserializer class>);
-         consumerConfigs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, <Replace this with value deserializer class>);
+         consumerConfigs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "<Replace this with key deserializer class>");
+         consumerConfigs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "<Replace this with value deserializer class>");
          consumerConfigs.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, Purchase.class );
          
         // Duplication of configs loaded from confluent.properties to emphasize what's needed to use SchemaRegistry
