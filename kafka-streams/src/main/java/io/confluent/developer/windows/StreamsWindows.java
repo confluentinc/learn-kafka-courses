@@ -1,6 +1,7 @@
 package io.confluent.developer.windows;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import static org.apache.kafka.streams.kstream.Suppressed.*;
 import static org.apache.kafka.streams.kstream.Suppressed.BufferConfig.*;
@@ -54,9 +56,21 @@ public class StreamsWindows {
                 .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

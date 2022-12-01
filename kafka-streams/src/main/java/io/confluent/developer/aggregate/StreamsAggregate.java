@@ -13,8 +13,10 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsAggregate {
 
@@ -46,8 +48,20 @@ public class StreamsAggregate {
               //  .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

@@ -1,7 +1,7 @@
 package io.confluent.developer.errors.solution;
 
 import io.confluent.developer.StreamsUtils;
-import io.confluent.developer.errors.TopicLoader;
+import io.confluent.developer.aggregate.TopicLoader;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.RecordTooLargeException;
@@ -19,8 +19,10 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.processor.ProcessorContext;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsErrorHandling {
     //This is for learning purposes only!
@@ -101,10 +103,21 @@ public class StreamsErrorHandling {
                 .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
-            kafkaStreams.setUncaughtExceptionHandler(new StreamsCustomUncaughtExceptionHandler());
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

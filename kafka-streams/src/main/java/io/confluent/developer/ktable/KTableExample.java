@@ -1,5 +1,6 @@
 package io.confluent.developer.ktable;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -12,7 +13,9 @@ import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class KTableExample {
 
@@ -44,9 +47,21 @@ public class KTableExample {
                 //.to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

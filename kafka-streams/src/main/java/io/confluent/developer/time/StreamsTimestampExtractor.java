@@ -1,6 +1,7 @@
 package io.confluent.developer.time;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsTimestampExtractor {
 
@@ -61,9 +63,21 @@ public class StreamsTimestampExtractor {
                 .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

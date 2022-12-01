@@ -1,5 +1,6 @@
 package io.confluent.developer.serdes;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ProcessedOrder;
 import io.confluent.developer.avro.ProductOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
@@ -14,10 +15,12 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsSerdesSchemaRegistry  {
 
@@ -42,8 +45,22 @@ public static void main(String[]args) throws IOException {
             .setTimeProcessed(Instant.now().toEpochMilli()).build())
     .to(outputTopic, Produced.with(Serdes.String(), processedOrderSerde));
 
-    KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-    kafkaStreams.start();
+    try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            kafkaStreams.close(Duration.ofSeconds(2));
+            shutdownLatch.countDown();
+        }));
+        TopicLoader.runProducer();
+        kafkaStreams.start();
+        try {
+            shutdownLatch.await();
+        }catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    System.exit(0);
 }
    static Map<String,String> propertiesToMap(final Properties properties) {
      final Map<String, String> configs = new HashMap<>();

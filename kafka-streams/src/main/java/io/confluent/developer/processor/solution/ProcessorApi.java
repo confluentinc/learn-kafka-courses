@@ -1,7 +1,7 @@
 package io.confluent.developer.processor.solution;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
-import io.confluent.developer.processor.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import static io.confluent.developer.StreamsUtils.*;
 
@@ -118,9 +119,21 @@ public class ProcessorApi {
                 doubleSerde.serializer(),
                 "aggregate-price");
 
-        try(final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

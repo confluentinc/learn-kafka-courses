@@ -1,6 +1,7 @@
 package io.confluent.developer.joins;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ApplianceOrder;
 import io.confluent.developer.avro.CombinedOrder;
 import io.confluent.developer.avro.ElectronicOrder;
@@ -26,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsJoin {
 
@@ -101,9 +103,21 @@ public class StreamsJoin {
         // .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
         // .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }

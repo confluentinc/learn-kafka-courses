@@ -1,5 +1,6 @@
 package io.confluent.developer.serdes;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -10,7 +11,9 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsSerdes {
 
@@ -33,9 +36,22 @@ public class StreamsSerdes {
                 // Add the correct key and value Serdes to write out to a topic
                 .to(outputTopic, Produced.with(null, null));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
+            TopicLoader.runProducer();
             kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            }catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
 }
 
