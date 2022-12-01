@@ -124,11 +124,11 @@ public class StreamsErrorHandling {
                 shutdownLatch.countDown();
             }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
             try {
+                kafkaStreams.start();
                 shutdownLatch.await();
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                System.exit(1);
             }
         }
         System.exit(0);

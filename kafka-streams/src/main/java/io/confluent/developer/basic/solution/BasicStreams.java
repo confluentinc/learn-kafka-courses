@@ -46,11 +46,11 @@ public class BasicStreams {
                 shutdownLatch.countDown();
             }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
             try {
+                kafkaStreams.start();
                 shutdownLatch.await();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (Throwable e) {
+                System.exit(1);
             }
         }
         System.exit(0);

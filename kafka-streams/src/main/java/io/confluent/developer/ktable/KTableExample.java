@@ -41,10 +41,10 @@ public class KTableExample {
         firstKTable.filter((key, value) -> value.contains(orderNumberStart))
                 .mapValues(value -> value.substring(value.indexOf("-") + 1))
                 .filter((key, value) -> Long.parseLong(value) > 1000);
-        // Add a method here to covert the table to a stream
-        // Then uncomment the following two lines to view results on the console and write to a topic
-        //.peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
-        //.to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+                // Add a method here to covert the table to a stream
+                // Then uncomment the following two lines to view results on the console and write to a topic
+                //.peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                //.to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
@@ -55,11 +55,11 @@ public class KTableExample {
                 shutdownLatch.countDown();
             }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
             try {
+                kafkaStreams.start();
                 shutdownLatch.await();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (Throwable e) {
+                System.exit(1);
             }
         }
         System.exit(0);
