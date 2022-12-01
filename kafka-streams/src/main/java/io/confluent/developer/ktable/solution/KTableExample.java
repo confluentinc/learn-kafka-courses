@@ -40,13 +40,13 @@ public class KTableExample {
                 .mapValues(value -> value.substring(value.indexOf("-") + 1))
                 .filter((key, value) -> Long.parseLong(value) > 1000)
                 .toStream()
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -54,7 +54,7 @@ public class KTableExample {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

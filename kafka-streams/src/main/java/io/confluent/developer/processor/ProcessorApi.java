@@ -52,9 +52,9 @@ public class ProcessorApi {
                 }
 
                 private void forwardAll(final long timestamp) {
-                   // Get a KeyValueIterator HINT there's a method on the KeyValueStore
-                   // Don't forget to close the iterator! HINT use try-with resources
-                   // Iterate over the records and create a Record instance and forward downstream HINT use a method on the ProcessorContext to forward
+                    // Get a KeyValueIterator HINT there's a method on the KeyValueStore
+                    // Don't forget to close the iterator! HINT use try-with resources
+                    // Iterate over the records and create a Record instance and forward downstream HINT use a method on the ProcessorContext to forward
                 }
 
                 @Override
@@ -95,7 +95,7 @@ public class ProcessorApi {
 
         // Add a source node to the topology  HINT: topology.addSource
         // Give it a name, add deserializers for the key and the value and provide the input topic name
-       
+
         // Now add a processor to the topology HINT topology.addProcessor
         // You'll give it a name, add a processor supplier HINT: a new instance and provide the store name
         // You'll also provide a parent name HINT: it's the name you used for the source node
@@ -108,7 +108,7 @@ public class ProcessorApi {
         try (KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -116,7 +116,7 @@ public class ProcessorApi {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

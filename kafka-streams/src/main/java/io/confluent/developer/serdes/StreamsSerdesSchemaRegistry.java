@@ -22,51 +22,52 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class StreamsSerdesSchemaRegistry  {
+public class StreamsSerdesSchemaRegistry {
 
-public static void main(String[]args) throws IOException {
-    final Properties streamsProps = new Properties();
-    streamsProps.load(new FileInputStream("src/main/resources/streams.properties"));
-    streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "schema-registry-streams");
+    public static void main(String[] args) throws IOException {
+        final Properties streamsProps = new Properties();
+        streamsProps.load(new FileInputStream("src/main/resources/streams.properties"));
+        streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "schema-registry-streams");
 
-    StreamsBuilder builder = new StreamsBuilder();
-    final String inputTopic = streamsProps.getProperty("sr.input.topic");
-    final String outputTopic = streamsProps.getProperty("sr.output.topic");
-    final Map<String, String> configMap = propertiesToMap(streamsProps);
+        StreamsBuilder builder = new StreamsBuilder();
+        final String inputTopic = streamsProps.getProperty("sr.input.topic");
+        final String outputTopic = streamsProps.getProperty("sr.output.topic");
+        final Map<String, String> configMap = propertiesToMap(streamsProps);
 
-    // Create the Avro Serde HINT there's a method in this class
-    final SpecificAvroSerde<ProductOrder> productOrderSerde = null;
-    // Create the Avro Serde HINT there's a method in this class
-    final SpecificAvroSerde<ProcessedOrder> processedOrderSerde = null;
+        // Create the Avro Serde HINT there's a method in this class
+        final SpecificAvroSerde<ProductOrder> productOrderSerde = null;
+        // Create the Avro Serde HINT there's a method in this class
+        final SpecificAvroSerde<ProcessedOrder> processedOrderSerde = null;
 
-    final KStream<String, ProductOrder> orderStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), productOrderSerde));
-    orderStream.mapValues(value -> ProcessedOrder.newBuilder()
-            .setProduct(value.getProduct())
-            .setTimeProcessed(Instant.now().toEpochMilli()).build())
-    .to(outputTopic, Produced.with(Serdes.String(), processedOrderSerde));
+        final KStream<String, ProductOrder> orderStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), productOrderSerde));
+        orderStream.mapValues(value -> ProcessedOrder.newBuilder()
+                        .setProduct(value.getProduct())
+                        .setTimeProcessed(Instant.now().toEpochMilli()).build())
+                .to(outputTopic, Produced.with(Serdes.String(), processedOrderSerde));
 
-    try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
-        final CountDownLatch shutdownLatch = new CountDownLatch(1);
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(()-> {
-            kafkaStreams.close(Duration.ofSeconds(2));
-            shutdownLatch.countDown();
-        }));
-        TopicLoader.runProducer();
-        kafkaStreams.start();
-        try {
-            shutdownLatch.await();
-        }catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
+            TopicLoader.runProducer();
+            kafkaStreams.start();
+            try {
+                shutdownLatch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
+        System.exit(0);
     }
-    System.exit(0);
-}
-   static Map<String,String> propertiesToMap(final Properties properties) {
-     final Map<String, String> configs = new HashMap<>();
-     properties.forEach((key, value) -> configs.put((String)key, (String)value));
-     return configs;
-   }
+
+    static Map<String, String> propertiesToMap(final Properties properties) {
+        final Map<String, String> configs = new HashMap<>();
+        properties.forEach((key, value) -> configs.put((String) key, (String) value));
+        return configs;
+    }
 
 
     static <T extends SpecificRecord> SpecificAvroSerde<T> getSpecificAvroSerde(final Map<String, String> serdeConfig) {

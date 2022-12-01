@@ -91,7 +91,6 @@ public class StreamsJoin {
         // .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
 
 
-
         // Now join the combinedStream with the userTable,
         // but you'll always want a result even if no corresponding entry is found in the table
         // Using the ValueJoiner created above, enrichmentJoiner, return a CombinedOrder instance enriched with user information
@@ -99,14 +98,14 @@ public class StreamsJoin {
 
         // Add these two statements after the join call to print results to the console and write results out
         // to a topic
-        
+
         // .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
         // .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -114,7 +113,7 @@ public class StreamsJoin {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

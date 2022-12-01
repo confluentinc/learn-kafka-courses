@@ -36,21 +36,21 @@ public class KTableExample {
         // along with the inputTopic create a Materialized instance and name the store
         // and provide a Serdes for the key and the value  HINT: Materialized.<String, String, KeyValueStore<Bytes, byte[]>>as
         // then use two methods to specify the key and value serde
-        KTable<String, String> firstKTable =  null;
-        
+        KTable<String, String> firstKTable = null;
+
         firstKTable.filter((key, value) -> value.contains(orderNumberStart))
                 .mapValues(value -> value.substring(value.indexOf("-") + 1))
                 .filter((key, value) -> Long.parseLong(value) > 1000);
-                // Add a method here to covert the table to a stream
-                // Then uncomment the following two lines to view results on the console and write to a topic
-                //.peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
-                //.to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+        // Add a method here to covert the table to a stream
+        // Then uncomment the following two lines to view results on the console and write to a topic
+        //.peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+        //.to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -58,7 +58,7 @@ public class KTableExample {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

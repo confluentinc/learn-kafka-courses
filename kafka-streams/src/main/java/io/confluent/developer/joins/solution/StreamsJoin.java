@@ -82,23 +82,23 @@ public class StreamsJoin {
 
         KStream<String, CombinedOrder> combinedStream =
                 applianceStream.join(
-                        electronicStream,
-                        orderJoiner,
-                        JoinWindows.of(Duration.ofMinutes(30)),
-                        StreamJoined.with(Serdes.String(), applianceSerde, electronicSerde))
-                .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
+                                electronicStream,
+                                orderJoiner,
+                                JoinWindows.of(Duration.ofMinutes(30)),
+                                StreamJoined.with(Serdes.String(), applianceSerde, electronicSerde))
+                        .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
 
         combinedStream.leftJoin(
-                userTable,
-                enrichmentJoiner,
-                Joined.with(Serdes.String(), combinedSerde, userSerde))
+                        userTable,
+                        enrichmentJoiner,
+                        Joined.with(Serdes.String(), combinedSerde, userSerde))
                 .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -106,7 +106,7 @@ public class StreamsJoin {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

@@ -28,7 +28,7 @@ public class StreamsTimestampExtractor {
     static class OrderTimestampExtractor implements TimestampExtractor {
         @Override
         public long extract(ConsumerRecord<Object, Object> record, long partitionTime) {
-            ElectronicOrder order = (ElectronicOrder)record.value();
+            ElectronicOrder order = (ElectronicOrder) record.value();
             System.out.println("Extracting time of " + order.getTime() + " from " + order);
             return order.getTime();
         }
@@ -49,23 +49,23 @@ public class StreamsTimestampExtractor {
 
         final KStream<String, ElectronicOrder> electronicStream =
                 builder.stream(inputTopic,
-                Consumed.with(Serdes.String(), electronicSerde)
-                        .withTimestampExtractor(new OrderTimestampExtractor()))
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                                Consumed.with(Serdes.String(), electronicSerde)
+                                        .withTimestampExtractor(new OrderTimestampExtractor()))
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
         electronicStream.groupByKey().windowedBy(TimeWindows.of(Duration.ofHours(1)))
                 .aggregate(() -> 0.0,
                         (key, order, total) -> total + order.getPrice(),
                         Materialized.with(Serdes.String(), Serdes.Double()))
                 .toStream()
-                .map((wk, value) -> KeyValue.pair(wk.key(),value))
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .map((wk, value) -> KeyValue.pair(wk.key(), value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -73,7 +73,7 @@ public class StreamsTimestampExtractor {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

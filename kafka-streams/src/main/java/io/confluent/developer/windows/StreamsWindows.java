@@ -41,25 +41,25 @@ public class StreamsWindows {
 
         final KStream<String, ElectronicOrder> electronicStream =
                 builder.stream(inputTopic, Consumed.with(Serdes.String(), electronicSerde))
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
         electronicStream.groupByKey()
                 // Window the aggregation by the hour and allow for records to be up 5 minutes late
                 .aggregate(() -> 0.0,
-                           (key, order, total) -> total + order.getPrice(),
-                           Materialized.with(Serdes.String(), Serdes.Double()))
+                        (key, order, total) -> total + order.getPrice(),
+                        Materialized.with(Serdes.String(), Serdes.Double()))
                 // Don't emit results until the window closes HINT suppression
                 .toStream()
                 // When windowing Kafka Streams wraps the key in a Windowed class
                 // After converting the table to a stream it's a good idea to extract the
                 // Underlying key from the Windowed instance HINT: use map 
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -67,7 +67,7 @@ public class StreamsWindows {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

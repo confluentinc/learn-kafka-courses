@@ -57,7 +57,7 @@ public class ProcessorApi {
                             final KeyValue<String, Double> nextKV = iterator.next();
                             final Record<String, Double> totalPriceRecord = new Record<>(nextKV.key, nextKV.value, timestamp);
                             context.forward(totalPriceRecord);
-                            System.out.println("Punctuation forwarded record - key " + totalPriceRecord.key() +" value " + totalPriceRecord.value());
+                            System.out.println("Punctuation forwarded record - key " + totalPriceRecord.key() + " value " + totalPriceRecord.value());
                         }
                     }
                 }
@@ -71,7 +71,7 @@ public class ProcessorApi {
                     }
                     Double newTotal = record.value().getPrice() + currentTotal;
                     store.put(key, newTotal);
-                    System.out.println("Processed incoming record - key " + key +" value " + record.value());
+                    System.out.println("Processed incoming record - key " + key + " value " + record.value());
                 }
             };
         }
@@ -122,7 +122,7 @@ public class ProcessorApi {
         try (KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -130,7 +130,7 @@ public class ProcessorApi {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

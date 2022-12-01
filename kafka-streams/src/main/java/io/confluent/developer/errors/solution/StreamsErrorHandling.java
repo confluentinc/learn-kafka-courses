@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
 public class StreamsErrorHandling {
     //This is for learning purposes only!
     static boolean throwErrorNow = true;
-    
+
     public static class StreamsDeserializationErrorHandler implements DeserializationExceptionHandler {
         int errorCounter = 0;
 
@@ -42,21 +42,23 @@ public class StreamsErrorHandling {
         }
 
         @Override
-        public void configure(Map<String, ?> configs) { }
+        public void configure(Map<String, ?> configs) {
+        }
     }
 
     public static class StreamsRecordProducerErrorHandler implements ProductionExceptionHandler {
         @Override
         public ProductionExceptionHandlerResponse handle(ProducerRecord<byte[], byte[]> record,
                                                          Exception exception) {
-            if (exception instanceof RecordTooLargeException ) {
+            if (exception instanceof RecordTooLargeException) {
                 return ProductionExceptionHandlerResponse.CONTINUE;
             }
             return ProductionExceptionHandlerResponse.FAIL;
         }
 
         @Override
-        public void configure(Map<String, ?> configs) { }
+        public void configure(Map<String, ?> configs) {
+        }
     }
 
     public static class StreamsCustomUncaughtExceptionHandler implements StreamsUncaughtExceptionHandler {
@@ -89,7 +91,7 @@ public class StreamsErrorHandling {
         final String orderNumberStart = "orderNumber-";
         KStream<String, String> streamWithErrorHandling =
                 builder.stream(inputTopic, Consumed.with(Serdes.String(), Serdes.String()))
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
         streamWithErrorHandling.filter((key, value) -> value.contains(orderNumberStart))
                 .mapValues(value -> {
@@ -100,13 +102,13 @@ public class StreamsErrorHandling {
                     return value.substring(value.indexOf("-") + 1);
                 })
                 .filter((key, value) -> Long.parseLong(value) > 1000)
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -114,7 +116,7 @@ public class StreamsErrorHandling {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }

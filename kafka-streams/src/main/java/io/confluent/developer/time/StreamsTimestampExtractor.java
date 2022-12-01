@@ -50,23 +50,23 @@ public class StreamsTimestampExtractor {
 
         final KStream<String, ElectronicOrder> electronicStream =
                 builder.stream(inputTopic,
-                Consumed.with(Serdes.String(), electronicSerde))
+                                Consumed.with(Serdes.String(), electronicSerde))
                         //Wire up the timestamp extractor HINT do it on the Consumed object vs configs
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
         electronicStream.groupByKey().windowedBy(TimeWindows.of(Duration.ofHours(1)))
                 .aggregate(() -> 0.0,
                         (key, order, total) -> total + order.getPrice(),
                         Materialized.with(Serdes.String(), Serdes.Double()))
                 .toStream()
-                .map((wk, value) -> KeyValue.pair(wk.key(),value))
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .map((wk, value) -> KeyValue.pair(wk.key(), value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(()-> {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
@@ -74,7 +74,7 @@ public class StreamsTimestampExtractor {
             kafkaStreams.start();
             try {
                 shutdownLatch.await();
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
