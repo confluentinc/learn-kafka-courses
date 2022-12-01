@@ -1,11 +1,11 @@
 package io.confluent.developer.joins.solution;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ApplianceOrder;
 import io.confluent.developer.avro.CombinedOrder;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.developer.avro.User;
-import io.confluent.developer.joins.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serdes;
@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsJoin {
 
@@ -81,22 +82,34 @@ public class StreamsJoin {
 
         KStream<String, CombinedOrder> combinedStream =
                 applianceStream.join(
-                        electronicStream,
-                        orderJoiner,
-                        JoinWindows.of(Duration.ofMinutes(30)),
-                        StreamJoined.with(Serdes.String(), applianceSerde, electronicSerde))
-                .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
+                                electronicStream,
+                                orderJoiner,
+                                JoinWindows.of(Duration.ofMinutes(30)),
+                                StreamJoined.with(Serdes.String(), applianceSerde, electronicSerde))
+                        .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
 
         combinedStream.leftJoin(
-                userTable,
-                enrichmentJoiner,
-                Joined.with(Serdes.String(), combinedSerde, userSerde))
+                        userTable,
+                        enrichmentJoiner,
+                        Joined.with(Serdes.String(), combinedSerde, userSerde))
                 .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

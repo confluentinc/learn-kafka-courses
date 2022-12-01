@@ -1,6 +1,7 @@
 package io.confluent.developer.joins;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ApplianceOrder;
 import io.confluent.developer.avro.CombinedOrder;
 import io.confluent.developer.avro.ElectronicOrder;
@@ -26,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsJoin {
 
@@ -89,7 +91,6 @@ public class StreamsJoin {
         // .peek((key, value) -> System.out.println("Stream-Stream Join record key " + key + " value " + value));
 
 
-
         // Now join the combinedStream with the userTable,
         // but you'll always want a result even if no corresponding entry is found in the table
         // Using the ValueJoiner created above, enrichmentJoiner, return a CombinedOrder instance enriched with user information
@@ -97,13 +98,25 @@ public class StreamsJoin {
 
         // Add these two statements after the join call to print results to the console and write results out
         // to a topic
-        
+
         // .peek((key, value) -> System.out.println("Stream-Table Join record key " + key + " value " + value))
         // .to(outputTopic, Produced.with(Serdes.String(), combinedSerde));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

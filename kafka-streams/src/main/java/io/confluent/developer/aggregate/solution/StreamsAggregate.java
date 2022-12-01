@@ -14,8 +14,10 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsAggregate {
 
@@ -34,18 +36,30 @@ public class StreamsAggregate {
 
         final KStream<String, ElectronicOrder> electronicStream =
                 builder.stream(inputTopic, Consumed.with(Serdes.String(), electronicSerde))
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
         electronicStream.groupByKey().aggregate(() -> 0.0,
-                                                (key, order, total) -> total + order.getPrice(),
-                                                 Materialized.with(Serdes.String(), Serdes.Double()))
-                                                .toStream()
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                        (key, order, total) -> total + order.getPrice(),
+                        Materialized.with(Serdes.String(), Serdes.Double()))
+                .toStream()
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+               System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

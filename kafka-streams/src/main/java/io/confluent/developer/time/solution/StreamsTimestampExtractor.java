@@ -1,8 +1,8 @@
 package io.confluent.developer.time.solution;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
-import io.confluent.developer.time.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.Serdes;
@@ -21,13 +21,14 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsTimestampExtractor {
 
     static class OrderTimestampExtractor implements TimestampExtractor {
         @Override
         public long extract(ConsumerRecord<Object, Object> record, long partitionTime) {
-            ElectronicOrder order = (ElectronicOrder)record.value();
+            ElectronicOrder order = (ElectronicOrder) record.value();
             System.out.println("Extracting time of " + order.getTime() + " from " + order);
             return order.getTime();
         }
@@ -48,22 +49,34 @@ public class StreamsTimestampExtractor {
 
         final KStream<String, ElectronicOrder> electronicStream =
                 builder.stream(inputTopic,
-                Consumed.with(Serdes.String(), electronicSerde)
-                        .withTimestampExtractor(new OrderTimestampExtractor()))
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                                Consumed.with(Serdes.String(), electronicSerde)
+                                        .withTimestampExtractor(new OrderTimestampExtractor()))
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
         electronicStream.groupByKey().windowedBy(TimeWindows.of(Duration.ofHours(1)))
                 .aggregate(() -> 0.0,
                         (key, order, total) -> total + order.getPrice(),
                         Materialized.with(Serdes.String(), Serdes.Double()))
                 .toStream()
-                .map((wk, value) -> KeyValue.pair(wk.key(),value))
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .map((wk, value) -> KeyValue.pair(wk.key(), value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

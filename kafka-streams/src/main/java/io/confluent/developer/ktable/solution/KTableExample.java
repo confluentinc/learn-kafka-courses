@@ -1,6 +1,6 @@
 package io.confluent.developer.ktable.solution;
 
-import io.confluent.developer.ktable.TopicLoader;
+import io.confluent.developer.aggregate.TopicLoader;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -13,7 +13,9 @@ import org.apache.kafka.streams.state.KeyValueStore;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class KTableExample {
 
@@ -38,12 +40,24 @@ public class KTableExample {
                 .mapValues(value -> value.substring(value.indexOf("-") + 1))
                 .filter((key, value) -> Long.parseLong(value) > 1000)
                 .toStream()
-                .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+                .peek((key, value) -> System.out.println("Outgoing record - key " + key + " value " + value))
                 .to(outputTopic, Produced.with(Serdes.String(), Serdes.String()));
 
-        try(KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

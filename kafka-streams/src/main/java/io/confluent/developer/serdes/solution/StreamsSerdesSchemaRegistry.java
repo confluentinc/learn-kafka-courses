@@ -1,5 +1,6 @@
 package io.confluent.developer.serdes.solution;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ProcessedOrder;
 import io.confluent.developer.avro.ProductOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
@@ -14,39 +15,56 @@ import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
-public class StreamsSerdesSchemaRegistry  {
+public class StreamsSerdesSchemaRegistry {
 
-public static void main(String[]args) throws IOException {
-    final Properties streamsProps = new Properties();
-    streamsProps.load(new FileInputStream("src/main/resources/streams.properties"));
-    streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "schema-registry-streams");
+    public static void main(String[] args) throws IOException {
+        final Properties streamsProps = new Properties();
+        streamsProps.load(new FileInputStream("src/main/resources/streams.properties"));
+        streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "schema-registry-streams");
 
-    StreamsBuilder builder = new StreamsBuilder();
-    final String inputTopic = streamsProps.getProperty("sr.input.topic");
-    final String outputTopic = streamsProps.getProperty("sr.output.topic");
-    final Map<String, String> configMap = propertiesToMap(streamsProps);
-    final SpecificAvroSerde<ProductOrder> productOrderSerde = getSpecificAvroSerde(configMap);
-    final SpecificAvroSerde<ProcessedOrder> processedOrderSerde = getSpecificAvroSerde(configMap);
+        StreamsBuilder builder = new StreamsBuilder();
+        final String inputTopic = streamsProps.getProperty("sr.input.topic");
+        final String outputTopic = streamsProps.getProperty("sr.output.topic");
+        final Map<String, String> configMap = propertiesToMap(streamsProps);
+        final SpecificAvroSerde<ProductOrder> productOrderSerde = getSpecificAvroSerde(configMap);
+        final SpecificAvroSerde<ProcessedOrder> processedOrderSerde = getSpecificAvroSerde(configMap);
 
-    final KStream<String, ProductOrder> orderStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), productOrderSerde));
-    orderStream.mapValues(value -> ProcessedOrder.newBuilder()
-            .setProduct(value.getProduct())
-            .setTimeProcessed(Instant.now().toEpochMilli()).build())
-    .to(outputTopic, Produced.with(Serdes.String(), processedOrderSerde));
+        final KStream<String, ProductOrder> orderStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), productOrderSerde));
+        orderStream.mapValues(value -> ProcessedOrder.newBuilder()
+                        .setProduct(value.getProduct())
+                        .setTimeProcessed(Instant.now().toEpochMilli()).build())
+                .to(outputTopic, Produced.with(Serdes.String(), processedOrderSerde));
 
-    KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps);
-    kafkaStreams.start();
-}
-   static Map<String,String> propertiesToMap(final Properties properties) {
-     final Map<String, String> configs = new HashMap<>();
-     properties.forEach((key, value) -> configs.put((String)key, (String)value));
-     return configs;
-   }
+        try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
+            TopicLoader.runProducer();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
+        }
+        System.exit(0);
+    }
+
+    static Map<String, String> propertiesToMap(final Properties properties) {
+        final Map<String, String> configs = new HashMap<>();
+        properties.forEach((key, value) -> configs.put((String) key, (String) value));
+        return configs;
+    }
 
 
     static <T extends SpecificRecord> SpecificAvroSerde<T> getSpecificAvroSerde(final Map<String, String> serdeConfig) {

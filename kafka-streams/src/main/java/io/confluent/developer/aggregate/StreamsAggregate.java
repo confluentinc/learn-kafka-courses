@@ -13,8 +13,10 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 public class StreamsAggregate {
 
@@ -33,21 +35,33 @@ public class StreamsAggregate {
 
         final KStream<String, ElectronicOrder> electronicStream =
                 builder.stream(inputTopic, Consumed.with(Serdes.String(), electronicSerde))
-                        .peek((key, value) -> System.out.println("Incoming record - key " +key +" value " + value));
+                        .peek((key, value) -> System.out.println("Incoming record - key " + key + " value " + value));
 
-              // Now take the electronicStream object, group by key and perform an aggregation
-              // Don't forget to convert the KTable returned by the aggregate call back to a KStream using the toStream method
-              electronicStream.groupByKey().aggregate(null, null);
+        // Now take the electronicStream object, group by key and perform an aggregation
+        // Don't forget to convert the KTable returned by the aggregate call back to a KStream using the toStream method
+        electronicStream.groupByKey().aggregate(null, null);
 
-              // To view the results of the aggregation consider
-              // right after the toStream() method .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
+        // To view the results of the aggregation consider
+        // right after the toStream() method .peek((key, value) -> System.out.println("Outgoing record - key " +key +" value " + value))
 
-              // Finally write the results to an output topic
-              //  .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
+        // Finally write the results to an output topic
+        //  .to(outputTopic, Produced.with(Serdes.String(), Serdes.Double()));
 
         try (KafkaStreams kafkaStreams = new KafkaStreams(builder.build(), streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

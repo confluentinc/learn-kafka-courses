@@ -1,7 +1,7 @@
 package io.confluent.developer.processor.solution;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
-import io.confluent.developer.processor.TopicLoader;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import static io.confluent.developer.StreamsUtils.*;
 
@@ -56,7 +57,7 @@ public class ProcessorApi {
                             final KeyValue<String, Double> nextKV = iterator.next();
                             final Record<String, Double> totalPriceRecord = new Record<>(nextKV.key, nextKV.value, timestamp);
                             context.forward(totalPriceRecord);
-                            System.out.println("Punctuation forwarded record - key " + totalPriceRecord.key() +" value " + totalPriceRecord.value());
+                            System.out.println("Punctuation forwarded record - key " + totalPriceRecord.key() + " value " + totalPriceRecord.value());
                         }
                     }
                 }
@@ -70,7 +71,7 @@ public class ProcessorApi {
                     }
                     Double newTotal = record.value().getPrice() + currentTotal;
                     store.put(key, newTotal);
-                    System.out.println("Processed incoming record - key " + key +" value " + record.value());
+                    System.out.println("Processed incoming record - key " + key + " value " + record.value());
                 }
             };
         }
@@ -118,9 +119,21 @@ public class ProcessorApi {
                 doubleSerde.serializer(),
                 "aggregate-price");
 
-        try(final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }

@@ -1,5 +1,6 @@
 package io.confluent.developer.processor;
 
+import io.confluent.developer.aggregate.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import static io.confluent.developer.StreamsUtils.*;
 
@@ -50,9 +52,9 @@ public class ProcessorApi {
                 }
 
                 private void forwardAll(final long timestamp) {
-                   // Get a KeyValueIterator HINT there's a method on the KeyValueStore
-                   // Don't forget to close the iterator! HINT use try-with resources
-                   // Iterate over the records and create a Record instance and forward downstream HINT use a method on the ProcessorContext to forward
+                    // Get a KeyValueIterator HINT there's a method on the KeyValueStore
+                    // Don't forget to close the iterator! HINT use try-with resources
+                    // Iterate over the records and create a Record instance and forward downstream HINT use a method on the ProcessorContext to forward
                 }
 
                 @Override
@@ -93,7 +95,7 @@ public class ProcessorApi {
 
         // Add a source node to the topology  HINT: topology.addSource
         // Give it a name, add deserializers for the key and the value and provide the input topic name
-       
+
         // Now add a processor to the topology HINT topology.addProcessor
         // You'll give it a name, add a processor supplier HINT: a new instance and provide the store name
         // You'll also provide a parent name HINT: it's the name you used for the source node
@@ -103,9 +105,21 @@ public class ProcessorApi {
         // and the name of the parent node HINT it's the name you gave the processor
 
 
-        try(final KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+        try (KafkaStreams kafkaStreams = new KafkaStreams(topology, streamsProps)) {
+            final CountDownLatch shutdownLatch = new CountDownLatch(1);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                kafkaStreams.close(Duration.ofSeconds(2));
+                shutdownLatch.countDown();
+            }));
             TopicLoader.runProducer();
-            kafkaStreams.start();
+            try {
+                kafkaStreams.start();
+                shutdownLatch.await();
+            } catch (Throwable e) {
+                System.exit(1);
+            }
         }
+        System.exit(0);
     }
 }
