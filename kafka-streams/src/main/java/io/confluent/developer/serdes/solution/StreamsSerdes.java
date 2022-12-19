@@ -1,6 +1,6 @@
 package io.confluent.developer.serdes.solution;
 
-import io.confluent.developer.aggregate.TopicLoader;
+import io.confluent.developer.serdes.TopicLoader;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -23,8 +23,8 @@ public class StreamsSerdes {
         streamsProps.put(StreamsConfig.APPLICATION_ID_CONFIG, "basic-streams");
 
         StreamsBuilder builder = new StreamsBuilder();
-        final String inputTopic = streamsProps.getProperty("basic.input.topic");
-        final String outputTopic = streamsProps.getProperty("basic.output.topic");
+        final String inputTopic = streamsProps.getProperty("serdes.input.topic");
+        final String outputTopic = streamsProps.getProperty("serdes.output.topic");
 
         final String orderNumberStart = "orderNumber-";
         KStream<String, String> firstStream = builder.stream(inputTopic, Consumed.with(Serdes.String(), Serdes.String()));

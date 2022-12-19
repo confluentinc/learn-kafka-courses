@@ -16,6 +16,10 @@ processor.input.topic=processor-input-topic
 processor.output.topic=processor-output-topic
 windowed.input.topic=windowed-input-topic
 windowed.output.topic=windowed-output-topic
+serdes.input.topic=serdes-input-topic
+serdes.output.topic=serdes-output-topic
+sr.input.topic=sr-input-topic
+sr.output.topic=sr-output-topic
 
 replication.factor=3
 

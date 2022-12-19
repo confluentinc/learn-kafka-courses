@@ -52,7 +52,7 @@ public class StreamsSerdesSchemaRegistry {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
-            TopicLoader.runProducer();
+            SRTopicLoader.runProducer();
             try {
                 kafkaStreams.start();
                 shutdownLatch.await();
