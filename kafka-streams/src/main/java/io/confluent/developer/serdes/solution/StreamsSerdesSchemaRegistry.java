@@ -1,6 +1,6 @@
 package io.confluent.developer.serdes.solution;
 
-import io.confluent.developer.aggregate.TopicLoader;
+import io.confluent.developer.serdes.SRTopicLoader;
 import io.confluent.developer.avro.ProcessedOrder;
 import io.confluent.developer.avro.ProductOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
@@ -49,7 +49,7 @@ public class StreamsSerdesSchemaRegistry {
                 kafkaStreams.close(Duration.ofSeconds(2));
                 shutdownLatch.countDown();
             }));
-            TopicLoader.runProducer();
+            SRTopicLoader.runProducer();
             try {
                 kafkaStreams.start();
                 shutdownLatch.await();

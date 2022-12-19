@@ -1,7 +1,7 @@
 package io.confluent.developer.errors.solution;
 
 import io.confluent.developer.StreamsUtils;
-import io.confluent.developer.aggregate.TopicLoader;
+import io.confluent.developer.errors.TopicLoader;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.RecordTooLargeException;

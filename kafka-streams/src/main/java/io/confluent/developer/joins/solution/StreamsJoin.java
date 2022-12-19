@@ -1,7 +1,7 @@
 package io.confluent.developer.joins.solution;
 
 import io.confluent.developer.StreamsUtils;
-import io.confluent.developer.aggregate.TopicLoader;
+import io.confluent.developer.joins.TopicLoader;
 import io.confluent.developer.avro.ApplianceOrder;
 import io.confluent.developer.avro.CombinedOrder;
 import io.confluent.developer.avro.ElectronicOrder;
