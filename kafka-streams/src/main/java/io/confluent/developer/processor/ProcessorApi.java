@@ -1,6 +1,5 @@
 package io.confluent.developer.processor;
 
-import io.confluent.developer.processor.TopicLoader;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
