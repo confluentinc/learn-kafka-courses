@@ -1,6 +1,5 @@
 package io.confluent.developer.serdes;
 
-import io.confluent.developer.serdes.TopicLoader;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;

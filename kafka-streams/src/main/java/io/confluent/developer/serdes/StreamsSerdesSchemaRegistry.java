@@ -1,6 +1,6 @@
 package io.confluent.developer.serdes;
 
-import io.confluent.developer.aggregate.TopicLoader;
+
 import io.confluent.developer.avro.ProcessedOrder;
 import io.confluent.developer.avro.ProductOrder;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;

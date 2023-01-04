@@ -1,6 +1,5 @@
 package io.confluent.developer.ktable;
 
-import io.confluent.developer.ktable.TopicLoader;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
