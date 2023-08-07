@@ -12,9 +12,9 @@ services:
     ports:
       - 3306:3306
     environment:
-     - MYSQL_ROOT_PASSWORD=kc101
-     - MYSQL_USER=mysqluser
-     - MYSQL_PASSWORD=mysqlpw
+     MYSQL_ROOT_PASSWORD: kc101
+     MYSQL_USER: mysqluser
+     MYSQL_PASSWORD: mysqlpw
     volumes:
      - ${PWD}/data/mysql:/docker-entrypoint-initdb.d
      - ${PWD}/data:/data
