@@ -18,6 +18,7 @@ public class BasicStreams {
 
     public static void main(String[] args) throws IOException {
         Properties streamsProps = new Properties();
+        // Make sure you've added your Confluent Cloud credentials as outlined in the README
         try (FileInputStream fis = new FileInputStream("src/main/resources/streams.properties")) {
             streamsProps.load(fis);
         }
