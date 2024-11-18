@@ -1,6 +1,7 @@
 package io.confluent.developer.aggregate;
 
 import io.confluent.developer.StreamsUtils;
+import io.confluent.developer.TopicAclConfigurer;
 import io.confluent.developer.avro.ElectronicOrder;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.admin.Admin;
@@ -33,6 +34,8 @@ public class TopicLoader {
             final String outputTopic = properties.getProperty("aggregate.output.topic");
             var topics = List.of(StreamsUtils.createTopic(inputTopic), StreamsUtils.createTopic(outputTopic));
             adminClient.createTopics(topics);
+            var serviceAccountName ="User:"+properties.getProperty("service.account.name");
+            TopicAclConfigurer.configureACLs(adminClient, topics, serviceAccountName);
 
             Callback callback = StreamsUtils.callback();
 
